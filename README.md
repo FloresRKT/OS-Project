@@ -1,3 +1,11 @@
+## How to setup
+1. Run ```npm install``` on root directory to install all frontend dependencies
+2. Run ```npm install``` on backend/ to install all backend dependencies
+
+## How to run
+1. Run ```npm start``` on root directory to start the expo app
+2. Run ```npm start -nodemon``` on backend/ to start the server
+
 # Sample Snack app
 
 Open the `App.js` file to start writing some code. You can preview the changes directly on your phone or tablet by scanning the **QR code** or use the iOS or Android emulators. When you're done, click **Save** and share the link!

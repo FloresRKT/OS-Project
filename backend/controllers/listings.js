@@ -102,8 +102,7 @@ exports.getListingById = async (req, res) => {
   try {
     const listing_id = req.params.id;
     db.get(
-      `SELECT * FROM listings
-      LEFT JOIN companies c ON c.user_id listings WHERE listing_id=?`,
+      `SELECT * FROM listings l LEFT JOIN companies c ON l.company_id = c.company_id WHERE listing_id=?`,
       [listing_id],
 
       // Error handling and response

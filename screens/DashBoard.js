@@ -98,9 +98,11 @@ export default function Dashboard({ navigation }) {
             {parkingData.map((lot) => (
               <View key={lot.listing_id} style={styles.card}>
                 <View style={styles.logoAndDetails}>
-                  <Image 
-                    source={{ uri: lot.logo || "https://via.placeholder.com/50" }} 
-                    style={styles.logo} 
+                  <Image
+                    source={{
+                      uri: lot.logo || "https://via.placeholder.com/50",
+                    }}
+                    style={styles.logo}
                   />
                   <View style={styles.details}>
                     <Text style={styles.companyName}>{lot.name}</Text>
@@ -119,7 +121,7 @@ export default function Dashboard({ navigation }) {
                 <View style={styles.capacityContainer}>
                   <Text style={styles.slots}>
                     <Text style={styles.greenText}>
-                      {lot.total_spaces - (lot.occupancy || 0)}
+                      {Math.max(0, lot.total_spaces - (lot.occupancy || 0))}
                     </Text>{" "}
                     Available of {lot.total_spaces} spaces
                   </Text>
@@ -143,14 +145,14 @@ export default function Dashboard({ navigation }) {
                     />
                   </View>
                 </View>
-
                 <View style={styles.separator} />
-
                 <TouchableOpacity
                   style={styles.parkButton}
-                  onPress={() => navigation.navigate("RentalDetails", {
-                    listingId: lot.listing_id
-                  })}
+                  onPress={() =>
+                    navigation.navigate("RentalDetails", {
+                      listingId: lot.listing_id,
+                    })
+                  }
                 >
                   <Text style={styles.parkButtonText}>Park Here</Text>
                 </TouchableOpacity>
@@ -162,92 +164,8 @@ export default function Dashboard({ navigation }) {
         <>
           {/* Header */}
           <View style={styles.searchContainer}>
-            <Text style={styles.header}>Your Listings</Text>
+            <Text style={styles.header}>Company Dashboard</Text>
           </View>
-
-          {/* Listings */}
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={["#000"]}
-                tintColor="#000"
-              />
-            }
-          >
-            {parkingData.map((lot) => (
-              <View key={lot.listing_id} style={styles.card}>
-                <View style={styles.logoAndDetails}>
-                  <Image
-                    source={{ uri: lot.logo || "https://via.placeholder.com/50" }}
-                    style={styles.logo}
-                  />
-                  <View style={styles.details}>
-                    <Text style={styles.companyName}>{lot.name}</Text>
-                    <Text style={styles.address}>
-                      {lot.unit_number} {lot.street}, {lot.barangay},{" "}
-                      {lot.municipality}
-                    </Text>
-                    <Text style={styles.description}>
-                      <Text style={styles.label}>Description:</Text>{" "}
-                      {lot.description}
-                    </Text>
-
-                    {/* Capacity and Occupancy Information */}
-                    <View style={styles.capacityContainer}>
-                      <Text style={styles.slots}>
-                        <Text style={styles.label}>Occupancy: </Text>
-                        <Text
-                          style={getOccupancyTextStyle(
-                            lot.occupancy,
-                            lot.total_spaces
-                          )}
-                        >
-                          {lot.occupancy || 0}/{lot.total_spaces}
-                        </Text>{" "}
-                        spaces filled
-                      </Text>
-
-                      {/* Occupancy Indicator Bar */}
-                      <View style={styles.occupancyBarContainer}>
-                        <View
-                          style={[
-                            styles.occupancyBar,
-                            {
-                              width: `${Math.min(
-                                100,
-                                ((lot.occupancy || 0) / lot.total_spaces) * 100
-                              )}%`,
-                              backgroundColor: getOccupancyColor(
-                                lot.occupancy,
-                                lot.total_spaces
-                              ),
-                            },
-                          ]}
-                        />
-                      </View>
-                    </View>
-                  </View>
-                </View>
-
-                <View style={styles.separator} />
-
-                <TouchableOpacity
-                  style={styles.parkButton}
-                  onPress={() =>
-                    navigation.navigate("ParkingDetails", {
-                      listingId: lot.listing_id,
-                      isOwner: true,
-                    })
-                  }
-                >
-                  <Text style={styles.parkButtonText}>Manage Listing</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </ScrollView>
         </>
       )}
     </View>
@@ -372,5 +290,5 @@ const styles = StyleSheet.create({
   occupancyBar: {
     height: "100%",
     borderRadius: 3,
-  }
+  },
 });

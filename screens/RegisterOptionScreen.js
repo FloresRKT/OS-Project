@@ -4,13 +4,11 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 export default function RegisterOptionScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      {/*
       <Image
         source={require('../assets/parkease-logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
-      */}
       
       {/* User Registration Button */}
       <TouchableOpacity 
@@ -39,10 +37,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 250,
     borderRadius: 25,
-    marginBottom: 40,
   },
   userButton: {
     backgroundColor: '#000',

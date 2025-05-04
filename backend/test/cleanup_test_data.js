@@ -15,6 +15,21 @@ function getTestUserIds() {
   });
 }
 
+// Function to identify test user IDs
+function getTestCompanyIds() {
+  return new Promise((resolve, reject) => {
+    db.all(
+      `SELECT company_id FROM companies WHERE email LIKE '%test%' OR email LIKE '%example%'`, 
+      function(err, rows) {
+        if (err) reject(err);
+        const companyIds = rows.map(row => row.company_id);
+        console.log(`Found ${companyIds.length} test company IDs`);
+        resolve(companyIds);
+      }
+    );
+  });
+}
+
 // Function to clean up rentals where test users are either renters or owners
 function cleanupRentals(userIds) {
   if (!userIds.length) {
@@ -109,8 +124,8 @@ function cleanupTestCompanies() {
 // Run all cleanup functions in the correct order
 async function runCleanup() {
   try {
-    // First, get all test user IDs
     const testUserIds = await getTestUserIds();
+    const testCompanyIds = await getTestCompanyIds();
     
     // Turn off foreign key constraints temporarily if needed
     await new Promise((resolve, reject) => {
@@ -124,7 +139,7 @@ async function runCleanup() {
     await cleanupRentals(testUserIds);
     
     // Delete listings owned by test users
-    await cleanupListingsByUserIds(testUserIds);
+    await cleanupListingsByUserIds(testCompanyIds);
     
     // Delete test companies
     await cleanupTestCompanies();

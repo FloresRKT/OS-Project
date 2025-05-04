@@ -12,20 +12,7 @@ exports.createRental = async (req, res) => {
       end_date,
       total_cost,
       remaining_cost,
-      status,
     } = req.body;
-
-    // Validate required fields
-    if (
-      !owner_id ||
-      !renter_id ||
-      !listing_id ||
-      !start_date ||
-      !end_date ||
-      !total_cost
-    ) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
 
     const sql = `INSERT INTO rents (
       owner_id,
@@ -35,9 +22,8 @@ exports.createRental = async (req, res) => {
       start_date,
       end_date,
       total_cost,
-      remaining_cost,
-      status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      remaining_cost
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 
     // Prepare parameters with default values if needed
     const params = [
@@ -49,7 +35,6 @@ exports.createRental = async (req, res) => {
       end_date,
       total_cost,
       remaining_cost !== undefined ? remaining_cost : total_cost,
-      status || "pending",
     ];
 
     db.run(sql, params, function (err) {

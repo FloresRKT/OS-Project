@@ -6,13 +6,11 @@ export default function WelcomeScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       <View style={styles.logoContainer}>
-        {/*
         <Image
           source={require('../assets/parkease-logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
-        */}
       </View>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
@@ -24,8 +22,8 @@ export default function WelcomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
-  logoContainer: { marginBottom: 80, alignItems: 'center' },
-  logo: { width: 175, height: 175, borderRadius: 25 },
+  logoContainer: { alignItems: 'center' },
+  logo: { width: 300, height: 250, borderRadius: 25 },
   button: {
     backgroundColor: '#000000',
     paddingVertical: 12.5,

@@ -1,11 +1,11 @@
 // Base API URL
-const BASE_URL = 'http://192.168.1.5:3000/api';
+const BASE_URL = "http://192.168.1.5:3000/api";
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({
-      message: 'An error occurred with the API request'
+      message: "An error occurred with the API request",
     }));
     throw new Error(error.message || `HTTP error! Status: ${response.status}`);
   }
@@ -15,9 +15,9 @@ const handleResponse = async (response) => {
 // Base fetch with common options
 const apiFetch = async (endpoint, options = {}) => {
   const url = `${BASE_URL}${endpoint}`;
-  
+
   const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...options.headers,
   };
 
@@ -30,7 +30,7 @@ const apiFetch = async (endpoint, options = {}) => {
     const response = await fetch(url, config);
     return handleResponse(response);
   } catch (error) {
-    console.error('API request failed:', error);
+    console.error("API request failed:", error);
     throw error;
   }
 };
@@ -38,26 +38,26 @@ const apiFetch = async (endpoint, options = {}) => {
 // API methods for authentication
 export const authAPI = {
   userLogin: (email, password) => {
-    return apiFetch('/users/login', {
-      method: 'POST',
+    return apiFetch("/users/login", {
+      method: "POST",
       body: JSON.stringify({ email, password }),
     });
   },
   userRegister: (userData) => {
-    return apiFetch('/users', {
-      method: 'POST',
+    return apiFetch("/users", {
+      method: "POST",
       body: JSON.stringify(userData),
     });
   },
   companyLogin: (email, password) => {
-    return apiFetch('/company/login', {
-      method: 'POST',
+    return apiFetch("/company/login", {
+      method: "POST",
       body: JSON.stringify({ email, password }),
     });
   },
   companyRegister: (companyData) => {
-    return apiFetch('/company', {
-      method: 'POST',
+    return apiFetch("/company", {
+      method: "POST",
       body: JSON.stringify(companyData),
     });
   },
@@ -67,39 +67,57 @@ export const authAPI = {
 export const parkingAPI = {
   // Get all listings (for users)
   getAllListings: () => {
-    return apiFetch('/listings');
+    return apiFetch("/listings");
   },
-  
+
   // Get parking lot by ID
   getListingById: (id) => {
     return apiFetch(`/listings/${id}`);
   },
-  
+
   // Search for parking lots by location
   searchParkingLots: (query) => {
     return apiFetch(`/listings/search?query=${encodeURIComponent(query)}`);
   },
-  
+
   // For companies: add a new parking lot
   addParkingLot: (parkingLotData) => {
-    return apiFetch('/parking-lots', {
-      method: 'POST',
+    return apiFetch("/parking-lots", {
+      method: "POST",
       body: JSON.stringify(parkingLotData),
     });
   },
-  
+
+  getBookingQueue: (listingId) => {
+    return apiFetch(`/listings/${listingId}/queue`);
+  },
+
+  addToQueue: (queueData) => {
+    return apiFetch("/queue", {
+      method: "POST",
+      body: JSON.stringify(queueData),
+    });
+  },
+
+  // Process the queue when a space becomes available
+  processQueue: (listingId) => {
+    return apiFetch(`/listings/${listingId}/process-queue`, {
+      method: "POST",
+    });
+  },
+
   // For companies: update parking lot details
   updateParkingLot: (id, parkingLotData) => {
     return apiFetch(`/parking-lots/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(parkingLotData),
     });
   },
-  
+
   // For companies: delete a parking lot
   deleteParkingLot: (id) => {
     return apiFetch(`/parking-lots/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };
@@ -112,13 +130,14 @@ export const bookingAPI = {
       console.error("No user ID provided to getUserBookings");
       return Promise.resolve([]);
     }
-    
+
     return apiFetch(`/user-rentals/${userId}`)
-      .then(data => {
+      .then((data) => {
         // Transform API data to match what the component expects
-        return data.map(booking => ({
+        return data.map((booking) => ({
           id: booking.rent_id,
           companyName: booking.owner_name,
+          listingId: booking.listing_id,
           address: `${booking.unit_number} ${booking.street}, ${booking.barangay}, ${booking.municipality}, ${booking.region}, ${booking.zip_code}`,
           parkingName: booking.description || "Parking Space", // Using description as name
           startTime: booking.start_date,
@@ -130,51 +149,51 @@ export const bookingAPI = {
           logo: "https://via.placeholder.com/50", // Placeholder image
           listing_id: booking.listing_id,
           check_in_time: booking.check_in_time,
-          check_out_time: booking.check_out_time
+          check_out_time: booking.check_out_time,
         }));
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching user bookings:", error);
         return [];
       });
   },
-  
+
   // Get all bookings for a company's parking lots
   getCompanyBookings: () => {
-    return apiFetch('/bookings/company');
+    return apiFetch("/bookings/company");
   },
-  
+
   // Create a new booking
   createBooking: (bookingData) => {
-    return apiFetch('/bookings', {
-      method: 'POST',
+    return apiFetch("/bookings", {
+      method: "POST",
       body: JSON.stringify(bookingData),
     });
   },
-  
+
   // Get details of a specific booking
   getBookingDetails: (id) => {
     return apiFetch(`/bookings/${id}`);
   },
-  
+
   // Cancel a booking
   cancelBooking: (id) => {
     return apiFetch(`/bookings/${id}/cancel`, {
-      method: 'PUT',
+      method: "PUT",
     });
   },
 
   checkIn: (rentalId) => {
     return apiFetch(`/rentals/${rentalId}/check-in`, {
-      method: 'POST'
+      method: "POST",
     });
   },
-  
+
   checkOut: (rentalId) => {
     return apiFetch(`/rentals/${rentalId}/check-out`, {
-      method: 'POST'
+      method: "POST",
     });
-  }
+  },
 };
 
 // API methods for user profile
@@ -182,11 +201,11 @@ export const userAPI = {
   // Update user profile
   updateUserProfile: (userId) => {
     return apiFetch(`/users/${userId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(userData),
     });
   },
-  
+
   // Get user profile by ID
   getUser: (userId) => {
     return apiFetch(`/users/${userId}`);

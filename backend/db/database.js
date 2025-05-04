@@ -110,7 +110,7 @@ function createRentsTable() {
       end_date TEXT NOT NULL,
       total_cost REAL NOT NULL,
       remaining_cost REAL NOT NULL,
-      status TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
       check_in_time TEXT,
       check_out_time TEXT,
       FOREIGN KEY (owner_id) REFERENCES companies(company_id),
@@ -162,65 +162,31 @@ function createProfileImageTables() {
       if (err) {
         console.error("Error creating profile_images table:", err.message);
       } else {
-        createTriggers();
+        createQueueTable();
       }
     }
   );
 }
 
-// Create triggers for automatic occupancy updates
-function createTriggers() {
-  // Drop existing trigger first to ensure clean recreation
-  db.run(`DROP TRIGGER IF EXISTS update_occupancy_on_status_change`, (err) => {
+function createQueueTable() {
+  db.run(`CREATE TABLE IF NOT EXISTS reservation_queue (
+    queue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    listing_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    position INTEGER NOT NULL,
+    request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status TEXT DEFAULT 'pending',
+    plate_number TEXT,
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    total_cost REAL NOT NULL,
+    FOREIGN KEY (listing_id) REFERENCES listings (listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+  )`, (err) => {
     if (err) {
-      console.error("Error dropping existing trigger:", err.message);
+      console.error("Error creating reservation_queue table:", err.message);
     } else {
-      console.log("Dropped existing trigger if it existed");
-
-      // Create the trigger with improved logging
-      db.run(
-        `
-        CREATE TRIGGER update_occupancy_on_status_change
-        AFTER UPDATE OF status ON rents
-        BEGIN
-          -- Debug: Log the trigger execution
-          INSERT INTO logs (message) VALUES ('Trigger fired: ' || OLD.status || ' -> ' || NEW.status || ' for listing ' || NEW.listing_id);
-          
-          -- Increase occupancy when status changes to 'active'
-          UPDATE listings 
-          SET occupancy = occupancy + 1
-          WHERE listing_id = NEW.listing_id AND NEW.status = 'active' AND OLD.status != 'active';
-          
-          -- Decrease occupancy when status changes from 'active' to anything else
-          UPDATE listings 
-          SET occupancy = MAX(0, occupancy - 1)
-          WHERE listing_id = NEW.listing_id AND NEW.status != 'active' AND OLD.status = 'active';
-        END;
-        `,
-        (err) => {
-          if (err) {
-            console.error("Error creating trigger:", err.message);
-          } else {
-            console.log("Occupancy update trigger created successfully");
-
-            // Create logs table for debugging if it doesn't exist
-            db.run(
-              `
-              CREATE TABLE IF NOT EXISTS logs (
-                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-                message TEXT
-              )
-            `,
-              (err) => {
-                if (err)
-                  console.error("Error creating logs table:", err.message);
-                else console.log("Logs table created or already exists");
-              }
-            );
-          }
-        }
-      );
+      console.log("Reservation queue table created successfully");
     }
   });
 }

@@ -31,8 +31,10 @@ const {
   getRentalByUserId, // GET rents/users/:id
 } = require("../controllers/rents");
 
-const { checkIn, checkOut } = require("../controllers/occupancy");
+const { addUserToQueue, getQueueByListingId, processQueue } = require("../controllers/queue");
 
+const { checkIn, checkOut } = require("../controllers/occupancy");
+  
 // User management routes
 router
   .route("/users")
@@ -70,8 +72,13 @@ router
 router.get("/user-rentals/:id", getRentalByUserId); // GET /user-rentals/1
 
 // Occupancy management routes
-router.post("/rentals/:rental_id/check-in", checkIn);
-router.post("/rentals/:rental_id/check-out", checkOut);
+router.post("/rentals/:rent_id/check-in", checkIn);
+router.post("/rentals/:rent_id/check-out", checkOut);
+
+// Queue management routes
+router.post('/queue', addUserToQueue); // POST /api/queue
+router.get('/listings/:id/queue', getQueueByListingId); // GET /api/listings/:id/queue
+router.post("/listings/:id/process-queue", processQueue); // GET /api/listings/:id/process-queue
 
 // Special route for cleaning up test data
 router.delete("/cleanup/test-users", deleteTestUsers);

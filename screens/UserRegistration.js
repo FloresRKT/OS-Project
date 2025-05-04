@@ -37,9 +37,7 @@ export default function UserRegistration({ navigation }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/*
       <Image source={require('../assets/parkease-logo.png')} style={styles.logo} />
-      */}
 
       <TextInput
         style={styles.input}
@@ -124,10 +122,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 200,
+    height: 150,
     alignSelf: "center",
-    marginBottom: 30,
     resizeMode: "contain",
   },
   input: {

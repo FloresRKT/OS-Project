@@ -46,14 +46,10 @@ export default function LoginScreen({ navigation }) {
 
       // Check if we got a valid response with user data
       if (userData && userData.user_id && role === "USER") {
-        console.log(userData);
         fetchData = await userAPI.getUser(userData.user_id);
-        console.log(fetchData);
         login(fetchData);
       } else if (userData && userData.user_id && role === "COMPANY") {
-        console.log(userData);
         fetchData = await userAPI.getCompany(userData.user_id);
-        console.log(fetchData);
         login(fetchData);
       } else {
         // If we got a response but no user data
@@ -76,13 +72,11 @@ export default function LoginScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000" />
       <View style={styles.logoContainer}>
-        {/*
         <Image
-          source={require('../assets/parkease-logo.png')}
+          source={require("../assets/parkease-logo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
-        */}
       </View>
 
       <TextInput
@@ -158,15 +152,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logoContainer: {
-    marginBottom: 40,
-    alignItems: "center",
-  },
-  logo: {
-    width: 200,
-    height: 200,
-    borderRadius: 25,
-  },
+  logoContainer: { alignItems: "center" },
+  logo: { width: 300, height: 200, borderRadius: 25 },
   input: {
     width: "80%",
     height: 50,

@@ -46,17 +46,27 @@ export default function RentalHistory({ navigation }) {
 
   // Filter rentals based on active tab
   const getFilteredRentals = () => {
-    const currentDate = new Date();
-
     if (activeTab === "active") {
+      // Active rentals: status is "active" only
       return rentalData.filter((rental) => {
-        const endDate = new Date(rental.endTime);
-        return endDate >= currentDate;
+        const isActive = rental.status === "active";
+        return isActive;
+      });
+    } else if (activeTab === "pending") {
+      // Pending rentals: status is "pending" or "queued"
+      return rentalData.filter((rental) => {
+        const isPending =
+          rental.status === "pending" || rental.status === "queued";
+        return isPending;
       });
     } else {
+      // Past rentals: status is "completed" or "expired" or "cancelled"
       return rentalData.filter((rental) => {
-        const endDate = new Date(rental.endTime);
-        return endDate < currentDate;
+        const isPast =
+          rental.status === "completed" ||
+          rental.status === "expired" ||
+          rental.status === "cancelled";
+        return isPast;
       });
     }
   };
@@ -77,6 +87,20 @@ export default function RentalHistory({ navigation }) {
           ]}
         >
           Active
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.tab, activeTab === "pending" && styles.activeTab]}
+        onPress={() => setActiveTab("pending")}
+      >
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === "pending" && styles.activeTabText,
+          ]}
+        >
+          Pending
         </Text>
       </TouchableOpacity>
 
@@ -113,6 +137,8 @@ export default function RentalHistory({ navigation }) {
               <Text style={styles.emptyStateText}>
                 {activeTab === "active"
                   ? "No active rentals found"
+                  : activeTab === "pending"
+                  ? "No pending reservations found"
                   : "No past rental history found"}
               </Text>
             </View>
@@ -127,9 +153,7 @@ export default function RentalHistory({ navigation }) {
                     style={styles.logo}
                   />
                   <View style={styles.details}>
-                    <Text style={styles.companyName}>
-                      {rental.companyName}
-                    </Text>
+                    <Text style={styles.companyName}>{rental.companyName}</Text>
 
                     <Text style={styles.dateInfo}>
                       <Text style={styles.label}>Address: </Text>
@@ -153,6 +177,8 @@ export default function RentalHistory({ navigation }) {
                           styles.statusBadge,
                           rental.status === "active"
                             ? styles.activeStatus
+                            : rental.status === "pending"
+                            ? styles.pendingStatus
                             : styles.pastStatus,
                         ]}
                       >
@@ -172,23 +198,28 @@ export default function RentalHistory({ navigation }) {
                   </View>
                 </View>
 
-                <View style={styles.separator} />
-
+                {/*
                 <TouchableOpacity
                   style={[
                     styles.detailsButton,
+                    activeTab === "pending" && styles.pendingButton,
                     activeTab === "past" && styles.pastButton,
                   ]}
                   onPress={() =>
                     navigation.navigate("RentalDetails", {
-                      rentalId: rental.id,
+                      listingId: rental.listing_id,
                     })
                   }
                 >
                   <Text style={styles.detailsButtonText}>
-                    {activeTab === "active" ? "View Details" : "View Receipt"}
+                    {activeTab === "active"
+                      ? "View Details"
+                      : activeTab === "pending"
+                      ? "View Reservation"
+                      : "View Receipt"}
                   </Text>
                 </TouchableOpacity>
+                */}
               </View>
             ))
           )}
@@ -314,6 +345,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
     color: "#666",
   },
+  pendingStatus: {
+    backgroundColor: "#fff0c2",
+    color: "#ffa000",
+  },
   price: {
     fontSize: 14,
     marginTop: 4,
@@ -324,6 +359,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 10,
     alignItems: "center",
+  },
+  pendingButton: {
+    backgroundColor: "#ffa000",
   },
   pastButton: {
     backgroundColor: "#666",

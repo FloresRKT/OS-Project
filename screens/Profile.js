@@ -18,7 +18,7 @@ export default function Profile({ navigation }) {
 
   // Check if we have a user logged in
   useEffect(() => {
-    if (!user) {
+    if (user.user_type === "GUEST") {
       // Redirect to login if no user is logged in
       navigation.replace("Login");
     }
@@ -27,7 +27,6 @@ export default function Profile({ navigation }) {
   const handleLogout = () => {
     setIsLoading(true);
     logout();
-    navigation.replace("Login");
   };
 
   // Handle edit profile navigation
@@ -98,40 +97,10 @@ export default function Profile({ navigation }) {
         {user.user_type === "COMPANY" && (
           <>
             <View style={styles.infoRow}>
-              <Ionicons name="business-outline" size={20} color="#666" />
-              <Text style={styles.infoLabel}>Company Name:</Text>
-              <Text style={styles.infoText}>{user.name}</Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Ionicons name="call-outline" size={20} color="#666" />
-              <Text style={styles.infoLabel}>Business Phone:</Text>
+              <Ionicons name="mail-outline" size={20} color="#666" />
+              <Text style={styles.infoLabel}>Email Address:</Text>
               <Text style={styles.infoText}>
-                {user.phone_number || "Not provided"}
-              </Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Ionicons name="location-outline" size={20} color="#666" />
-              <Text style={styles.infoLabel}>Business Address:</Text>
-              <Text style={styles.infoText}>
-                {user.address || "Not provided"}
-              </Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Ionicons name="document-text-outline" size={20} color="#666" />
-              <Text style={styles.infoLabel}>Registration #:</Text>
-              <Text style={styles.infoText}>
-                {user.registration_number || "Not provided"}
-              </Text>
-            </View>
-
-            <View style={styles.infoRow}>
-              <Ionicons name="calendar-outline" size={20} color="#666" />
-              <Text style={styles.infoLabel}>Established:</Text>
-              <Text style={styles.infoText}>
-                {new Date(user.date_joined || Date.now()).toLocaleDateString()}
+                {user.email || "Not provided"}
               </Text>
             </View>
           </>

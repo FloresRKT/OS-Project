@@ -1,25 +1,37 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 
 export default function UserRegistration({ navigation }) {
-  const [lastName, setLastName] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [plateNumber, setPlateNumber] = useState('');
-  const [licenseSerial, setLicenseSerial] = useState('');
-  const [carType, setCarType] = useState('');
+  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [email, setEmail] = useState('');
+  const [plateNumber, setPlateNumber] = useState("");
+  const [licenseSerial, setLicenseSerial] = useState("");
+  const [carType, setCarType] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = () => {
     if (!lastName || !firstName || !plateNumber || !licenseSerial || !carType) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      Alert.alert('Success', 'Registration successful!');
-      navigation.navigate('Login');
+      Alert.alert("Success", "Registration successful!");
+      navigation.navigate("Login");
     }, 1500);
   };
 
@@ -31,15 +43,22 @@ export default function UserRegistration({ navigation }) {
 
       <TextInput
         style={styles.input}
+        placeholder="First Name"
+        value={firstName}
+        onChangeText={setFirstName}
+      />
+      <TextInput
+        style={styles.input}
         placeholder="Last Name"
         value={lastName}
         onChangeText={setLastName}
       />
       <TextInput
         style={styles.input}
-        placeholder="First Name"
-        value={firstName}
-        onChangeText={setFirstName}
+        placeholder="Email Address"
+        value={plateNumber}
+        onChangeText={setEmail}
+        autoCapitalize="characters"
       />
       <TextInput
         style={styles.input}
@@ -48,6 +67,22 @@ export default function UserRegistration({ navigation }) {
         onChangeText={setPlateNumber}
         autoCapitalize="characters"
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Your Password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm your Password"
+        secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+      />
+
+      {/*
       <TextInput
         style={styles.input}
         placeholder="Driver’s License Serial No."
@@ -60,6 +95,7 @@ export default function UserRegistration({ navigation }) {
         value={carType}
         onChangeText={setCarType}
       />
+      */}
 
       <TouchableOpacity
         style={styles.button}
@@ -67,7 +103,13 @@ export default function UserRegistration({ navigation }) {
         disabled={isLoading}
       >
         <Text style={styles.buttonText}>
-          {isLoading ? 'Registering...' : 'Register'}
+          {isLoading ? "Registering..." : "Register"}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+        <Text style={styles.loginText}>
+          Already have an account? Login here
         </Text>
       </TouchableOpacity>
     </ScrollView>
@@ -77,20 +119,20 @@ export default function UserRegistration({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   logo: {
     width: 120,
     height: 120,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 30,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   input: {
     height: 50,
-    borderColor: '#000',
+    borderColor: "#000",
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 15,
@@ -98,18 +140,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
-    alignSelf: 'center',
+    alignSelf: "center",
     width: 160,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontFamily: 'Inter-ExtraBold',
+    fontFamily: "Inter-ExtraBold",
+  },
+  loginText: {
+    color: "#007bff",
+    textAlign: "center",
+    marginTop: 15,
   },
 });

@@ -37,21 +37,28 @@ const apiFetch = async (endpoint, options = {}) => {
 
 // API methods for authentication
 export const authAPI = {
-  login: (email, password) => {
-    return apiFetch('/auth/login', {
+  userLogin: (email, password) => {
+    return apiFetch('/users/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
   },
-  register: (userData) => {
-    return apiFetch('/auth/register', {
+  userRegister: (userData) => {
+    return apiFetch('/users', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
   },
-  logout: () => {
-    return apiFetch('/auth/logout', {
+  companyLogin: (email, password) => {
+    return apiFetch('/company/login', {
       method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
+  companyRegister: (companyData) => {
+    return apiFetch('/company', {
+      method: 'POST',
+      body: JSON.stringify(companyData),
     });
   },
 };
@@ -111,7 +118,8 @@ export const bookingAPI = {
         // Transform API data to match what the component expects
         return data.map(booking => ({
           id: booking.rent_id,
-          companyName: booking.company_name,
+          companyName: booking.owner_name,
+          address: `${booking.unit_number} ${booking.street}, ${booking.barangay}, ${booking.municipality}, ${booking.region}, ${booking.zip_code}`,
           parkingName: booking.description || "Parking Space", // Using description as name
           startTime: booking.start_date,
           endTime: booking.end_date,
@@ -171,37 +179,22 @@ export const bookingAPI = {
 
 // API methods for user profile
 export const userAPI = {
-  // Get current user profile
-  getCurrentUser: () => {
-    return apiFetch('/users/me');
-  },
-  
   // Update user profile
-  updateUserProfile: (userData) => {
-    return apiFetch('/users/me', {
+  updateUserProfile: (userId) => {
+    return apiFetch(`/users/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(userData),
     });
   },
   
-  // Get user vehicles
-  getUserVehicles: () => {
-    return apiFetch('/users/vehicles');
+  // Get user profile by ID
+  getUser: (userId) => {
+    return apiFetch(`/users/${userId}`);
   },
-  
-  // Add a new vehicle
-  addVehicle: (vehicleData) => {
-    return apiFetch('/users/vehicles', {
-      method: 'POST',
-      body: JSON.stringify(vehicleData),
-    });
-  },
-  
-  // Delete a vehicle
-  deleteVehicle: (id) => {
-    return apiFetch(`/users/vehicles/${id}`, {
-      method: 'DELETE',
-    });
+
+  // Get company profile by ID
+  getCompany: (companyId) => {
+    return apiFetch(`/company/${companyId}`);
   },
 };
 

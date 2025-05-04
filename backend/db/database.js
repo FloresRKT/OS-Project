@@ -17,16 +17,44 @@ function createTables() {
     `
     CREATE TABLE IF NOT EXISTS users (
       user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_type TEXT NOT NULL,
-      name TEXT NOT NULL,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
-      plate_number TEXT
+      plate_number TEXT,
+      serial_number TEXT,
+      car_type TEXT,
+      user_type TEXT NOT NULL DEFAULT 'USER'
     )
   `,
     (err) => {
       if (err) {
         console.error("Error creating users table:", err.message);
+      } else {
+        createCompanyTable();
+      }
+    }
+  );
+}
+
+// Company table
+function createCompanyTable() {
+  db.run(
+    `
+    CREATE TABLE IF NOT EXISTS companies (
+      company_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      username TEXT,
+      password TEXT NOT NULL,
+      address TEXT,
+      contact_number TEXT,
+      user_type TEXT NOT NULL DEFAULT 'COMPANY'
+    )
+  `,
+    (err) => {
+      if (err) {
+        console.error("Error creating companies table:", err.message);
       } else {
         createListingsTable();
       }
@@ -40,7 +68,7 @@ function createListingsTable() {
     `
     CREATE TABLE IF NOT EXISTS listings (
       listing_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id TEXT NOT NULL,
+      company_id TEXT NOT NULL,
       unit_number TEXT NOT NULL,
       street TEXT NOT NULL,
       barangay TEXT NOT NULL,
@@ -55,7 +83,7 @@ function createListingsTable() {
       description TEXT NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       isActive INTEGER DEFAULT 1,
-      FOREIGN KEY (user_id) REFERENCES users(user_id)
+      FOREIGN KEY (company_id) REFERENCES companies(company_id)
     )
   `,
     (err) => {
@@ -85,7 +113,7 @@ function createRentsTable() {
       status TEXT NOT NULL,
       check_in_time TEXT,
       check_out_time TEXT,
-      FOREIGN KEY (owner_id) REFERENCES users(user_id),
+      FOREIGN KEY (owner_id) REFERENCES companies(company_id),
       FOREIGN KEY (renter_id) REFERENCES users(user_id),
       FOREIGN KEY (listing_id) REFERENCES listings(listing_id)
     )

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   ScrollView,
   StyleSheet,
   Image,
@@ -14,11 +13,10 @@ import { bookingAPI } from "../services/api";
 
 export default function RentalHistory({ navigation }) {
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState("active"); // 'active' or 'past'
+  const [activeTab, setActiveTab] = useState("active");
   const [rentalData, setRentalData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch data when user changes
   useEffect(() => {
     if (user?.user_id) {
       fetchRentalHistory();
@@ -31,8 +29,6 @@ export default function RentalHistory({ navigation }) {
   const fetchRentalHistory = async () => {
     try {
       setIsLoading(true);
-
-      // Fetch user's rental history
       const data = await bookingAPI.getUserBookings(user.user_id);
       setRentalData(data || []);
     } catch (error) {
@@ -53,13 +49,11 @@ export default function RentalHistory({ navigation }) {
     const currentDate = new Date();
 
     if (activeTab === "active") {
-      // Show bookings where end date is in the future
       return rentalData.filter((rental) => {
         const endDate = new Date(rental.endTime);
         return endDate >= currentDate;
       });
     } else {
-      // Show bookings where end date is in the past
       return rentalData.filter((rental) => {
         const endDate = new Date(rental.endTime);
         return endDate < currentDate;
@@ -101,105 +95,104 @@ export default function RentalHistory({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.searchContainer}>
         <Text style={styles.header}>Rental History</Text>
       </View>
 
-      {/* Tab Navigation */}
       <TabHeader />
 
-      {/* Loading Indicator */}
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#000" />
           <Text style={styles.loadingText}>Loading rentals...</Text>
         </View>
       ) : (
-        <>
-          {/* Rental Listings */}
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
-            {filteredRentals.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyStateText}>
-                  {activeTab === "active"
-                    ? "No active rentals found"
-                    : "No past rental history found"}
-                </Text>
-              </View>
-            ) : (
-              filteredRentals.map((rental) => (
-                <View key={rental.id} style={styles.card}>
-                  <View style={styles.logoAndDetails}>
-                    <Image
-                      source={{
-                        uri: rental.logo || "https://via.placeholder.com/50",
-                      }}
-                      style={styles.logo}
-                    />
-                    <View style={styles.details}>
-                      <Text style={styles.companyName}>
-                        {rental.companyName}
-                      </Text>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {filteredRentals.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>
+                {activeTab === "active"
+                  ? "No active rentals found"
+                  : "No past rental history found"}
+              </Text>
+            </View>
+          ) : (
+            filteredRentals.map((rental) => (
+              <View key={rental.id} style={styles.card}>
+                <View style={styles.logoAndDetails}>
+                  <Image
+                    source={{
+                      uri: rental.logo || "https://via.placeholder.com/50",
+                    }}
+                    style={styles.logo}
+                  />
+                  <View style={styles.details}>
+                    <Text style={styles.companyName}>
+                      {rental.companyName}
+                    </Text>
 
-                      <Text style={styles.dateInfo}>
-                        <Text style={styles.label}>Start: </Text>
-                        {formatDate(rental.startTime)}
-                      </Text>
+                    <Text style={styles.dateInfo}>
+                      <Text style={styles.label}>Address: </Text>
+                      {rental.address}
+                    </Text>
 
-                      <Text style={styles.dateInfo}>
-                        <Text style={styles.label}>End: </Text>
-                        {formatDate(rental.startTime)}
-                      </Text>
+                    <Text style={styles.dateInfo}>
+                      <Text style={styles.label}>Start: </Text>
+                      {formatDate(rental.startTime)}
+                    </Text>
 
-                      <View style={styles.statusContainer}>
-                        <Text style={styles.label}>Status: </Text>
-                        <Text
-                          style={[
-                            styles.statusBadge,
-                            rental.status === "active"
-                              ? styles.activeStatus
-                              : styles.pastStatus,
-                          ]}
-                        >
-                          {rental.status}
-                        </Text>
-                      </View>
+                    <Text style={styles.dateInfo}>
+                      <Text style={styles.label}>End: </Text>
+                      {formatDate(rental.endTime)}
+                    </Text>
 
-                      <Text style={styles.price}>
-                        <Text style={styles.label}>Rate: </Text>₱
-                        {rental.amount?.toFixed(2) || "0.00"}
-                      </Text>
-
-                      <Text style={styles.price}>
-                        <Text style={styles.label}>Balance: </Text>₱
-                        {rental.remainingAmount?.toFixed(2) || "0.00"}
+                    <View style={styles.statusContainer}>
+                      <Text style={styles.label}>Status: </Text>
+                      <Text
+                        style={[
+                          styles.statusBadge,
+                          rental.status === "active"
+                            ? styles.activeStatus
+                            : styles.pastStatus,
+                        ]}
+                      >
+                        {rental.status}
                       </Text>
                     </View>
-                  </View>
 
-                  <View style={styles.separator} />
-
-                  <TouchableOpacity
-                    style={[
-                      styles.detailsButton,
-                      activeTab === "past" && styles.pastButton,
-                    ]}
-                    onPress={() =>
-                      navigation.navigate("RentalDetails", {
-                        rentalId: rental.id,
-                      })
-                    }
-                  >
-                    <Text style={styles.detailsButtonText}>
-                      {activeTab === "active" ? "View Details" : "View Receipt"}
+                    <Text style={styles.price}>
+                      <Text style={styles.label}>Rate: </Text>₱
+                      {rental.amount?.toFixed(2) || "0.00"}
                     </Text>
-                  </TouchableOpacity>
+
+                    <Text style={styles.price}>
+                      <Text style={styles.label}>Balance: </Text>₱
+                      {rental.remainingAmount?.toFixed(2) || "0.00"}
+                    </Text>
+                  </View>
                 </View>
-              ))
-            )}
-          </ScrollView>
-        </>
+
+                <View style={styles.separator} />
+
+                <TouchableOpacity
+                  style={[
+                    styles.detailsButton,
+                    activeTab === "past" && styles.pastButton,
+                  ]}
+                  onPress={() =>
+                    navigation.navigate("RentalDetails", {
+                      rentalId: rental.id,
+                    })
+                  }
+                >
+                  <Text style={styles.detailsButtonText}>
+                    {activeTab === "active" ? "View Details" : "View Receipt"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
+        </ScrollView>
       )}
     </View>
   );
@@ -213,15 +206,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     padding: 15,
     backgroundColor: "#fff",
-  },
-  searchBar: {
-    borderWidth: 1,
-    borderColor: "#aaa",
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    height: 40,
-    fontSize: 14,
-    marginTop: "25",
   },
   scrollContainer: {
     paddingHorizontal: 15,
@@ -265,22 +249,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 2,
   },
-  address: {
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  description: {
-    fontSize: 13,
-    marginBottom: 4,
-  },
   label: {
-    fontWeight: "bold",
-  },
-  slots: {
-    fontSize: 13,
-  },
-  greenText: {
-    color: "green",
     fontWeight: "bold",
   },
   separator: {
@@ -288,36 +257,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     marginVertical: 10,
   },
-  parkButton: {
-    backgroundColor: "#000",
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: "center",
-  },
-  parkButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    flexDirection: "row",
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    paddingVertical: 10,
-    justifyContent: "space-around",
-  },
-  navButton: {
-    alignItems: "center",
-  },
-  navLabel: {
-    fontSize: 12,
-    marginTop: 3,
-    fontFamily: "Inter-Medium",
-  },
-  // Add these new styles:
   tabContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,

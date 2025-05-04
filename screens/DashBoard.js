@@ -13,7 +13,7 @@ import { useUser } from "../context/UserContext";
 import { parkingAPI } from "../services/api";
 
 export default function Dashboard({ navigation }) {
-  const { user, error, login, logout } = useUser();
+  const { user } = useUser();
   const [parkingData, setParkingData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -26,11 +26,6 @@ export default function Dashboard({ navigation }) {
     try {
       const data = await parkingAPI.getAllListings();
       setParkingData(data);
-      for (const lot of data) {
-        console.log(
-          `Occupancy for ${lot.name}: ${lot.occupancy || 0}/${lot.total_spaces}`
-        );
-      }
     } catch (error) {
       console.error("Error fetching parking lots:", error);
     }
@@ -72,7 +67,7 @@ export default function Dashboard({ navigation }) {
   return (
     <View style={styles.container}>
       {/* Conditional Rendering */}
-      {user.type === "USER" ? (
+      {user.user_type === "USER" ? (
         <>
           {/* Fixed Search Bar */}
           <View style={styles.searchContainer}>
@@ -103,7 +98,10 @@ export default function Dashboard({ navigation }) {
             {parkingData.map((lot) => (
               <View key={lot.listing_id} style={styles.card}>
                 <View style={styles.logoAndDetails}>
-                  <Image source={{ uri: lot.logo }} style={styles.logo} />
+                  <Image 
+                    source={{ uri: lot.logo || "https://via.placeholder.com/50" }} 
+                    style={styles.logo} 
+                  />
                   <View style={styles.details}>
                     <Text style={styles.companyName}>{lot.name}</Text>
                     <Text style={styles.address}>
@@ -150,7 +148,9 @@ export default function Dashboard({ navigation }) {
 
                 <TouchableOpacity
                   style={styles.parkButton}
-                  onPress={() => navigation.navigate("ParkingDetails")}
+                  onPress={() => navigation.navigate("RentalDetails", {
+                    listingId: lot.listing_id
+                  })}
                 >
                   <Text style={styles.parkButtonText}>Park Here</Text>
                 </TouchableOpacity>
@@ -166,76 +166,88 @@ export default function Dashboard({ navigation }) {
           </View>
 
           {/* Listings */}
-          {parkingData.map((lot) => (
-            <View key={lot.listing_id} style={styles.card}>
-              <View style={styles.logoAndDetails}>
-                <Image
-                  source={{ uri: lot.logo || "https://via.placeholder.com/50" }}
-                  style={styles.logo}
-                />
-                <View style={styles.details}>
-                  <Text style={styles.companyName}>{lot.name}</Text>
-                  <Text style={styles.address}>
-                    {lot.unit_number} {lot.street}, {lot.barangay},{" "}
-                    {lot.municipality}
-                  </Text>
-                  <Text style={styles.description}>
-                    <Text style={styles.label}>Description:</Text>{" "}
-                    {lot.description}
-                  </Text>
-
-                  {/* Capacity and Occupancy Information */}
-                  <View style={styles.capacityContainer}>
-                    <Text style={styles.slots}>
-                      <Text style={styles.label}>Occupancy: </Text>
-                      <Text
-                        style={getOccupancyTextStyle(
-                          lot.occupancy,
-                          lot.total_spaces
-                        )}
-                      >
-                        {lot.occupancy || 0}/{lot.total_spaces}
-                      </Text>{" "}
-                      spaces filled
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={["#000"]}
+                tintColor="#000"
+              />
+            }
+          >
+            {parkingData.map((lot) => (
+              <View key={lot.listing_id} style={styles.card}>
+                <View style={styles.logoAndDetails}>
+                  <Image
+                    source={{ uri: lot.logo || "https://via.placeholder.com/50" }}
+                    style={styles.logo}
+                  />
+                  <View style={styles.details}>
+                    <Text style={styles.companyName}>{lot.name}</Text>
+                    <Text style={styles.address}>
+                      {lot.unit_number} {lot.street}, {lot.barangay},{" "}
+                      {lot.municipality}
+                    </Text>
+                    <Text style={styles.description}>
+                      <Text style={styles.label}>Description:</Text>{" "}
+                      {lot.description}
                     </Text>
 
-                    {/* Occupancy Indicator Bar */}
-                    <View style={styles.occupancyBarContainer}>
-                      <View
-                        style={[
-                          styles.occupancyBar,
-                          {
-                            width: `${Math.min(
-                              100,
-                              ((lot.occupancy || 0) / lot.total_spaces) * 100
-                            )}%`,
-                            backgroundColor: getOccupancyColor(
-                              lot.occupancy,
-                              lot.total_spaces
-                            ),
-                          },
-                        ]}
-                      />
+                    {/* Capacity and Occupancy Information */}
+                    <View style={styles.capacityContainer}>
+                      <Text style={styles.slots}>
+                        <Text style={styles.label}>Occupancy: </Text>
+                        <Text
+                          style={getOccupancyTextStyle(
+                            lot.occupancy,
+                            lot.total_spaces
+                          )}
+                        >
+                          {lot.occupancy || 0}/{lot.total_spaces}
+                        </Text>{" "}
+                        spaces filled
+                      </Text>
+
+                      {/* Occupancy Indicator Bar */}
+                      <View style={styles.occupancyBarContainer}>
+                        <View
+                          style={[
+                            styles.occupancyBar,
+                            {
+                              width: `${Math.min(
+                                100,
+                                ((lot.occupancy || 0) / lot.total_spaces) * 100
+                              )}%`,
+                              backgroundColor: getOccupancyColor(
+                                lot.occupancy,
+                                lot.total_spaces
+                              ),
+                            },
+                          ]}
+                        />
+                      </View>
                     </View>
                   </View>
                 </View>
+
+                <View style={styles.separator} />
+
+                <TouchableOpacity
+                  style={styles.parkButton}
+                  onPress={() =>
+                    navigation.navigate("ParkingDetails", {
+                      listingId: lot.listing_id,
+                      isOwner: true,
+                    })
+                  }
+                >
+                  <Text style={styles.parkButtonText}>Manage Listing</Text>
+                </TouchableOpacity>
               </View>
-
-              <View style={styles.separator} />
-
-              <TouchableOpacity
-                style={styles.parkButton}
-                onPress={() =>
-                  navigation.navigate("ParkingDetails", {
-                    listingId: lot.listing_id,
-                    isOwner: true,
-                  })
-                }
-              >
-                <Text style={styles.parkButtonText}>Manage Listing</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+            ))}
+          </ScrollView>
         </>
       )}
     </View>
@@ -258,7 +270,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     height: 40,
     fontSize: 14,
-    marginTop: "25",
+    marginTop: 25,
   },
   scrollContainer: {
     paddingHorizontal: 15,
@@ -335,25 +347,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    flexDirection: "row",
-    borderTopWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-    paddingVertical: 10,
-    justifyContent: "space-around",
-  },
-  navButton: {
-    alignItems: "center",
-  },
-  navLabel: {
-    fontSize: 12,
-    marginTop: 3,
-    fontFamily: "Inter-Medium",
-  },
   highOccupancyText: {
     color: "#ff4d4d",
     fontWeight: "bold",
@@ -379,8 +372,5 @@ const styles = StyleSheet.create({
   occupancyBar: {
     height: "100%",
     borderRadius: 3,
-  },
-  disabledButton: {
-    backgroundColor: "#999",
-  },
+  }
 });

@@ -5,11 +5,15 @@ const db = require("../db/database");
 const {
   getUsers, // GET all users
   createUser, // POST a new user
+  createCompany, // POST a new company
+  loginCompany, // POST company/login
   loginUser, // POST users/login
   getUserById, // GET users/:id
+  getCompanyById, // GET company/:id
   updateUser, // PUT users/:id
   deleteUser, // DELETE users/:id
   deleteTestUsers, // DELETE test users
+  deleteTestCompanies, // DELETE test companies
 } = require("../controllers/users");
 
 const {
@@ -41,6 +45,10 @@ router
   .put(updateUser) // PUT /users/123
   .delete(deleteUser); // DELETE /users/123
 
+router.post("/company", createCompany); // POST /company
+router.post("/company/login", loginCompany); // POST /company/login
+router.get("/company/:id", getCompanyById); // GET /company/123
+  
 // Listing management routes
 router
   .route("/listings")
@@ -67,5 +75,6 @@ router.post("/rentals/:rental_id/check-out", checkOut);
 
 // Special route for cleaning up test data
 router.delete("/cleanup/test-users", deleteTestUsers);
+router.delete("/cleanup/test-companies", deleteTestCompanies);
 
 module.exports = router;

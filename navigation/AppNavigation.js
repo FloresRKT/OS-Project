@@ -17,7 +17,8 @@ import CompanyRegistration from "../screens/CompanyRegistration";
 import UserProfile from "../screens/UserProfile";
 import Dashboard from "../screens/DashBoard";
 import RentalHistory from "../screens/RentalHistoryScreen";
-import ParkingDetailsScreen from "../screens/ParkingOption";
+import YearlyRentalTwoWheeled from "../screens/SPYearly";
+import Profile from "../screens/Profile";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -60,7 +61,7 @@ function BottomTabs() {
       />
       <Tab.Screen
         name="Profile"
-        component={UserProfile}
+        component={Profile}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
@@ -73,14 +74,16 @@ function BottomTabs() {
 }
 
 export default function AppNavigation() {
-  const { user, isLoggedIn, isLoading } = useUser();
+  const { user, isLoading } = useUser();
   const navigation = useNavigation();
 
   useEffect(() => {
     if (!isLoading) {
+      const isLoggedIn = user.user_type !== "GUEST"
+
       navigation.reset({
         index: 0,
-        routes: [{ name: user.user_id ? "BottomTabs" : "Welcome" }],
+        routes: [{ name: isLoggedIn ? "BottomTabs" : "Welcome" }],
       });
     }
   }, [user, isLoading]);
@@ -97,7 +100,7 @@ export default function AppNavigation() {
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="BottomTabs" component={BottomTabs} />
-      <Stack.Screen name="ParkingDetails" component={ParkingDetailsScreen} />
+      <Stack.Screen name="RentalDetails" component={YearlyRentalTwoWheeled} />
       <Stack.Screen
         name="RegistrationOptions"
         component={RegisterOptionScreen}

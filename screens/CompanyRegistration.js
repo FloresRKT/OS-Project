@@ -51,6 +51,7 @@ export default function CompanyRegistration({ navigation }) {
         autoCapitalize="none"
       />
       
+      {/*
       <TextInput
         style={styles.input}
         placeholder="Username"
@@ -58,6 +59,7 @@ export default function CompanyRegistration({ navigation }) {
         onChangeText={setUsername}
         autoCapitalize="none"
       />
+      */}
       
       <TextInput
         style={styles.input}

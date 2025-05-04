@@ -11,8 +11,8 @@ async function createTestData() {
 
     for (i = 0; i < NUMBER_OF_USERS; i++) {
       const createUserResponse = await axios.post(`${BASE_URL}/users`, {
-        user_type: "USER",
-        name: `Test User ${i}`,
+        first_name: `Test`,
+        last_name: `${i}`,
         email: `testuser${i}@example.com`,
         password: "pass123",
         plate_number: `ABC-000${i}`,
@@ -24,7 +24,7 @@ async function createTestData() {
     // 2. Create Companies
     const companyIds = [];
 
-    let createCompanyResponse = await axios.post(`${BASE_URL}/users`, {
+    let createCompanyResponse = await axios.post(`${BASE_URL}/company`, {
       user_type: "COMPANY",
       name: `ParkWay Solutions`,
       email: `parkwaysolutions@example.com`,
@@ -34,7 +34,7 @@ async function createTestData() {
     console.log(`Create Company 1:`, createCompanyResponse.data);
     companyIds.push(createCompanyResponse.data.user_id);
 
-    createCompanyResponse = await axios.post(`${BASE_URL}/users`, {
+    createCompanyResponse = await axios.post(`${BASE_URL}/company`, {
       user_type: "COMPANY",
       name: `PrimePark Management`,
       email: `primeparkmgmt@example.com`,
@@ -48,7 +48,7 @@ async function createTestData() {
     const listingIds = [];
 
     let createListingResponse = await axios.post(`${BASE_URL}/listings`, {
-      user_id: companyIds[0], // First company ID
+      company_id: companyIds[0], // First company ID
       unit_number: "58",
       street: "Mangga Street",
       barangay: "Tandang Sora",
@@ -63,7 +63,7 @@ async function createTestData() {
     listingIds.push(createListingResponse.data.listing_id);
 
     createListingResponse = await axios.post(`${BASE_URL}/listings`, {
-      user_id: companyIds[1], // Second company ID
+      company_id: companyIds[1], // Second company ID
       unit_number: "21-A",
       street: "Dahlia Avenue",
       barangay: "Fairview",

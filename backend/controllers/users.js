@@ -3,18 +3,67 @@ const db = require("../db/database");
 // Create user
 exports.createUser = async (req, res) => {
   try {
-    const { user_type, name, email, password, plate_number } = req.body;
+    const { first_name, last_name, email, password, plate_number } = req.body;
 
     db.run(
-      `INSERT INTO users (user_type, name, email, password, plate_number) 
+      `INSERT INTO users (first_name, last_name, email, password, plate_number) 
        VALUES (?, ?, ?, ?, ?)`,
-      [user_type, name, email, password, plate_number],
+      [first_name, last_name, email, password, plate_number],
       function (err) {
         if (err) return res.status(400).json({ error: err.message });
         res.json({
           user_id: this.lastID,
           message: "User created successfully",
         });
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Create company
+exports.createCompany = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    db.run(
+      `INSERT INTO companies (name, email, password) 
+       VALUES (?, ?, ?)`,
+      [name, email, password],
+      function (err) {
+        if (err) return res.status(400).json({ error: err.message });
+        res.json({
+          user_id: this.lastID,
+          message: "User created successfully",
+        });
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Login Company
+exports.loginCompany = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    db.get(
+      `SELECT * FROM companies WHERE email=? AND password=?`,
+      [email, password],
+
+      // Error handling and response
+      (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (row) {
+          res.json({
+            user_id: row.company_id,
+            message: "Company signed in successfully",
+          });
+        } else {
+          res.status(401).json({ error: "Invalid email or password" });
+        }
       }
     );
   } catch (err) {
@@ -83,6 +132,29 @@ exports.getUserById = async (req, res) => {
   }
 };
 
+// Get company by ID
+exports.getCompanyById = async (req, res) => {
+  try {
+    const company_id = req.params.id;
+    db.get(
+      `SELECT * FROM companies WHERE company_id=?`,
+      [ company_id ],
+
+      // Error handling and response
+      (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (row) {
+          res.json(row);
+        } else {
+          res.status(404).json({ error: "Company not found" });
+        }
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 // Update user details. Currently changes all fields, change this later and specify
 // only necessary fields
 exports.updateUser = async (req, res) => {
@@ -129,6 +201,24 @@ exports.deleteTestUsers = async (req, res) => {
         
         res.json({
           message: "Test users deleted successfully",
+          rowsAffected: this.changes
+        });
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Delete test users
+exports.deleteTestCompanies = async (req, res) => {
+  try {
+    // Delete users with test emails
+    db.run(`DELETE FROM companies WHERE email LIKE '%test%' OR email LIKE '%example%'`, 
+      function (err) {
+        if (err) return res.status(400).json({ error: err.message });
+        
+        res.json({
+          message: "Test companies deleted successfully",
           rowsAffected: this.changes
         });
     });

@@ -74,9 +74,6 @@ exports.updateRental = async (req, res) => {
     const rent_id = req.params.id;
     const { status, remaining_cost, check_in_time, check_out_time } = req.body;
 
-    console.log(`Updating rental ${rent_id} with status: ${status}`);
-
-    // First, get the current rental to compare status change
     db.get(
       `SELECT * FROM rents WHERE rent_id = ?`,
       [rent_id],
@@ -224,7 +221,13 @@ exports.getRentalByUserId = async (req, res) => {
     const user_id = req.params.id;
 
     db.all(
-      `SELECT * FROM rents r LEFT JOIN users u ON r.renter_id = u.user_id WHERE u.user_id = ?`,
+      `SELECT r.*, l.unit_number, l.street, l.barangay, l.municipality, 
+      l.region, l.zip_code, u.first_name || " " || u.last_name AS renter_name, c.name AS owner_name 
+      FROM rents r 
+      LEFT JOIN users u ON r.renter_id = u.user_id 
+      LEFT JOIN companies c ON r.owner_id = c.company_id
+      LEFT JOIN listings l ON r.listing_id = l.listing_id
+      WHERE u.user_id = ?`,
       [user_id],
       (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });

@@ -67,7 +67,7 @@ function cleanupListingsByUserIds(userIds) {
   
   return new Promise((resolve, reject) => {
     db.run(
-      `DELETE FROM listings WHERE user_id IN (${placeholders})`, 
+      `DELETE FROM listings WHERE company_id IN (${placeholders})`, 
       userIds,
       function(err) {
         if (err) reject(err);
@@ -86,6 +86,20 @@ function cleanupTestUsers() {
       function(err) {
         if (err) reject(err);
         console.log(`Deleted ${this.changes} test users`);
+        resolve(this.changes);
+      }
+    );
+  });
+}
+
+// Function to clean up test companies
+function cleanupTestCompanies() {
+  return new Promise((resolve, reject) => {
+    db.run(
+      `DELETE FROM companies WHERE email LIKE '%test%' OR email LIKE '%example%'`, 
+      function(err) {
+        if (err) reject(err);
+        console.log(`Deleted ${this.changes} test companies`);
         resolve(this.changes);
       }
     );
@@ -112,6 +126,9 @@ async function runCleanup() {
     // Delete listings owned by test users
     await cleanupListingsByUserIds(testUserIds);
     
+    // Delete test companies
+    await cleanupTestCompanies();
+
     // Delete test users
     await cleanupTestUsers();
     

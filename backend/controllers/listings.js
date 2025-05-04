@@ -4,7 +4,7 @@ const db = require("../db/database");
 exports.createListing = async (req, res) => {
   try {
     const {
-      user_id,
+      company_id,
       unit_number,
       street,
       barangay,
@@ -19,7 +19,7 @@ exports.createListing = async (req, res) => {
 
     db.run(
       `INSERT INTO listings (
-        user_id,
+        company_id,
         unit_number,
         street,
         barangay,
@@ -32,7 +32,7 @@ exports.createListing = async (req, res) => {
         description
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        user_id,
+        company_id,
         unit_number,
         street,
         barangay,
@@ -82,7 +82,7 @@ exports.deleteListing = async (req, res) => {
 exports.getAllListings = async (req, res) => {
   try {
     db.all(
-      "SELECT * FROM listings l JOIN users u ON u.user_id = l.user_id ORDER BY l.listing_id DESC",
+      "SELECT * FROM listings l JOIN companies c ON c.company_id = l.company_id ORDER BY l.listing_id DESC",
       [],
       (err, rows) => {
         if (err) {
@@ -102,7 +102,8 @@ exports.getListingById = async (req, res) => {
   try {
     const listing_id = req.params.id;
     db.get(
-      `SELECT * FROM listings WHERE listing_id=?`,
+      `SELECT * FROM listings
+      LEFT JOIN companies c ON c.user_id listings WHERE listing_id=?`,
       [listing_id],
 
       // Error handling and response

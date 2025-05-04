@@ -4,15 +4,16 @@ export const UserContext = createContext(null);
 
 // Create mock user data
 const mockUser = {
-  user_id: '1',
+  user_id: '-1',
   name: 'John Doe',
   email: 'john@example.com',
-  type: 'USER', // or 'Company'
+  user_type: 'USER', // or 'Company'
 };
 
 const noUser = {
   user_id: null,
   name: 'Guest',
+  user_type: 'GUEST'
 };
 
 export const UserProvider = ({ children }) => {
@@ -20,11 +21,9 @@ export const UserProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const isLoggedIn = () => user.id !== null;
-
   // Simple login/logout
-  const login = () => {
-    setUser(mockUser);
+  const login = (userData) => {
+    setUser(userData);
     setIsLoading(false);
   };
 
@@ -37,14 +36,14 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       await new Promise(resolve => setTimeout(resolve, 500));
-      setUser(noUser); // Use mockUser for testing
+      setUser(noUser); // Use noUser for testing
       setIsLoading(false);
     };
     checkAuth();
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, isLoggedIn, isLoading, login, logout }}>
+    <UserContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </UserContext.Provider>
   );

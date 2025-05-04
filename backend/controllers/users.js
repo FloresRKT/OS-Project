@@ -118,3 +118,21 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+// Delete test users
+exports.deleteTestUsers = async (req, res) => {
+  try {
+    // Delete users with test emails
+    db.run(`DELETE FROM users WHERE email LIKE '%test%' OR email LIKE '%example%'`, 
+      function (err) {
+        if (err) return res.status(400).json({ error: err.message });
+        
+        res.json({
+          message: "Test users deleted successfully",
+          rowsAffected: this.changes
+        });
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};

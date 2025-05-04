@@ -12,7 +12,7 @@ exports.createListing = async (req, res) => {
       region,
       zip_code,
       total_spaces,
-      occupancy,
+      occupancy = 0,
       rate_per_day,
       description,
     } = req.body;
@@ -82,7 +82,7 @@ exports.deleteListing = async (req, res) => {
 exports.getAllListings = async (req, res) => {
   try {
     db.all(
-      "SELECT * FROM listings l JOIN users u ON u.user_id = l.user_id",
+      "SELECT * FROM listings l JOIN users u ON u.user_id = l.user_id ORDER BY l.listing_id DESC",
       [],
       (err, rows) => {
         if (err) {

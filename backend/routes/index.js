@@ -9,6 +9,7 @@ const {
   getUserById, // GET users/:id
   updateUser, // PUT users/:id
   deleteUser, // DELETE users/:id
+  deleteTestUsers, // DELETE test users
 } = require("../controllers/users");
 
 const {
@@ -20,45 +21,51 @@ const {
 } = require("../controllers/listings");
 
 const {
-  createRental, // POST a new rental
-  getRentalById, // GET rental/:id
-  updateRental, // PUT rental/:id
+  createRental, // POST rents/
+  getRentalById, // GET rents/:id
+  updateRental, // PUT rents/:id
+  getRentalByUserId, // GET rents/users/:id
 } = require("../controllers/rents");
 
-// RESTful routes
+const { checkIn, checkOut } = require("../controllers/occupancy");
+
+// User management routes
 router
   .route("/users")
   .get(getUsers) // GET /users
   .post(createUser); // POST /users
-
 router.post("/users/login", loginUser); // POST /users/login
-
 router
   .route("/users/:id")
   .get(getUserById) // GET /users/123
   .put(updateUser) // PUT /users/123
   .delete(deleteUser); // DELETE /users/123
 
+// Listing management routes
 router
   .route("/listings")
   .post(createListing) // POST /listings
   .get(getAllListings); // GET /listings
-
 router
   .route("/listings/:id")
   .get(getListingById) // GET /listings/123
   .put(updateListing) // PUT /listings/123
   .delete(deleteListing); // DELETE /listings/123
 
-router.route("/rents").post(createRental); // POST /listings
-
+// Rental management routes
+router.route("/rents").post(createRental); // POST /rents
 router
   .route("/rents/:id")
   .get(getRentalById) // GET /rents/123
   .put(updateRental); // PUT /rents/123
 
-// router.get("/listings/:id/earnings", getListingEarnings);
-// router.get("/listings/:id/occupancy", getListingOccupancy);
-// router.get("/users/:id/dashboard", getDashboardMetrics);
+router.get("/user-rentals/:id", getRentalByUserId); // GET /user-rentals/1
+
+// Occupancy management routes
+router.post("/rentals/:rental_id/check-in", checkIn);
+router.post("/rentals/:rental_id/check-out", checkOut);
+
+// Special route for cleaning up test data
+router.delete("/cleanup/test-users", deleteTestUsers);
 
 module.exports = router;

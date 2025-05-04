@@ -4,14 +4,14 @@ export const UserContext = createContext(null);
 
 // Create mock user data
 const mockUser = {
-  id: '1',
+  user_id: '1',
   name: 'John Doe',
   email: 'john@example.com',
   type: 'USER', // or 'Company'
 };
 
 const noUser = {
-  id: null,
+  user_id: null,
   name: 'Guest',
 };
 

@@ -100,8 +100,35 @@ export const parkingAPI = {
 // API methods for bookings
 export const bookingAPI = {
   // Get all bookings for a user
-  getUserBookings: () => {
-    return apiFetch('/bookings/user');
+  getUserBookings: (userId) => {
+    if (!userId) {
+      console.error("No user ID provided to getUserBookings");
+      return Promise.resolve([]);
+    }
+    
+    return apiFetch(`/user-rentals/${userId}`)
+      .then(data => {
+        // Transform API data to match what the component expects
+        return data.map(booking => ({
+          id: booking.rent_id,
+          companyName: booking.company_name,
+          parkingName: booking.description || "Parking Space", // Using description as name
+          startTime: booking.start_date,
+          endTime: booking.end_date,
+          status: booking.status,
+          amount: booking.total_cost,
+          remainingAmount: booking.remaining_cost,
+          plateNumber: booking.plate_number,
+          logo: "https://via.placeholder.com/50", // Placeholder image
+          listing_id: booking.listing_id,
+          check_in_time: booking.check_in_time,
+          check_out_time: booking.check_out_time
+        }));
+      })
+      .catch(error => {
+        console.error("Error fetching user bookings:", error);
+        return [];
+      });
   },
   
   // Get all bookings for a company's parking lots
@@ -128,6 +155,18 @@ export const bookingAPI = {
       method: 'PUT',
     });
   },
+
+  checkIn: (rentalId) => {
+    return apiFetch(`/rentals/${rentalId}/check-in`, {
+      method: 'POST'
+    });
+  },
+  
+  checkOut: (rentalId) => {
+    return apiFetch(`/rentals/${rentalId}/check-out`, {
+      method: 'POST'
+    });
+  }
 };
 
 // API methods for user profile

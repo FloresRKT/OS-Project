@@ -16,20 +16,11 @@ import RegistrationScreen from "../screens/UserRegistration";
 import CompanyRegistration from "../screens/CompanyRegistration";
 import UserProfile from "../screens/UserProfile";
 import Dashboard from "../screens/DashBoard";
+import RentalHistory from "../screens/RentalHistoryScreen";
 import ParkingDetailsScreen from "../screens/ParkingOption";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
-
-// Placeholder History component since it's not imported
-function History() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Booking History</Text>
-      <Text>Your past and upcoming bookings will appear here.</Text>
-    </View>
-  );
-}
 
 // Bottom Navigation
 function BottomTabs() {
@@ -59,7 +50,7 @@ function BottomTabs() {
       />
       <Tab.Screen
         name="Rental History"
-        component={History}
+        component={RentalHistory}
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
@@ -89,7 +80,7 @@ export default function AppNavigation() {
     if (!isLoading) {
       navigation.reset({
         index: 0,
-        routes: [{ name: user.id ? "BottomTabs" : "Welcome" }],
+        routes: [{ name: user.user_id ? "BottomTabs" : "Welcome" }],
       });
     }
   }, [user, isLoading]);

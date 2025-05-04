@@ -1,11 +1,16 @@
 ## How to setup
 1. Run ```npm install``` on root directory to install all frontend dependencies
 2. Run ```npm install``` on backend/ to install all backend dependencies
+3. Run ```ipconfig``` on the system where the server is running and find the IPv4 address (local IP)
+3. Change the ```BASE_URL``` in services/api.js to your server's local IP address (example: http://192.168.5.11:3000/api)
 
 ## How to run
 1. Run ```npm start``` on root directory to start the expo app
 2. Run ```npm start -nodemon``` on backend/ to start the server
 
+--- 
+
+# Original readme.md
 # Sample Snack app
 
 Open the `App.js` file to start writing some code. You can preview the changes directly on your phone or tablet by scanning the **QR code** or use the iOS or Android emulators. When you're done, click **Save** and share the link!

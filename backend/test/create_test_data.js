@@ -1,5 +1,5 @@
 const axios = require("axios");
-const BASE_URL = "http://localhost:3000/api";
+const BASE_URL = "http://172.30.18.176:3000/api";
 
 const NUMBER_OF_USERS = 9; // Number of users to create
 const NUMBER_OF_COMPANIES = 2; // Number of companies to create

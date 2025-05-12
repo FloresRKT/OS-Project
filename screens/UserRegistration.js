@@ -9,11 +9,12 @@ import {
   Image,
   Alert,
 } from "react-native";
+import { authAPI } from "../services/api";
 
 export default function UserRegistration({ navigation }) {
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [plateNumber, setPlateNumber] = useState("");
   const [licenseSerial, setLicenseSerial] = useState("");
   const [carType, setCarType] = useState("");
@@ -21,23 +22,45 @@ export default function UserRegistration({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = () => {
-    if (!lastName || !firstName || !plateNumber || !licenseSerial || !carType) {
+  const handleRegister = async () => {
+    if (!lastName || !firstName || !plateNumber || !email) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      Alert.alert("Success", "Registration successful!");
+
+    try {
+      const response = await authAPI.userRegister({
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        password: password,
+        plate_number: plateNumber,
+      });
+
+      const data = typeof response.json === "function" ? await response.json() : response;
+
+      Alert.alert("Success", "Renter registration successful!");
+      
       navigation.navigate("Login");
-    }, 1500);
+    } catch (error) {
+      console.error("Registration error:", error);
+      Alert.alert(
+        "Error",
+        error.message || "Something went wrong during registration"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={require('../assets/parkease-logo.png')} style={styles.logo} />
+      <Image
+        source={require("../assets/parkease-logo.png")}
+        style={styles.logo}
+      />
 
       <TextInput
         style={styles.input}
@@ -54,9 +77,8 @@ export default function UserRegistration({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Email Address"
-        value={plateNumber}
+        value={email}
         onChangeText={setEmail}
-        autoCapitalize="characters"
       />
       <TextInput
         style={styles.input}

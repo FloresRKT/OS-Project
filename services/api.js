@@ -1,5 +1,5 @@
 // Base API URL
-const BASE_URL = "http://192.168.1.5:3000/api";
+const BASE_URL = "http://172.30.18.176:3000/api";
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
@@ -82,7 +82,7 @@ export const parkingAPI = {
 
   // For companies: add a new parking lot
   addParkingLot: (parkingLotData) => {
-    return apiFetch("/parking-lots", {
+    return apiFetch("/listings", {
       method: "POST",
       body: JSON.stringify(parkingLotData),
     });
@@ -93,6 +93,7 @@ export const parkingAPI = {
   },
 
   addToQueue: (queueData) => {
+    console.log("Adding to queue:", queueData);
     return apiFetch("/queue", {
       method: "POST",
       body: JSON.stringify(queueData),
@@ -102,6 +103,26 @@ export const parkingAPI = {
   // Process the queue when a space becomes available
   processQueue: (listingId) => {
     return apiFetch(`/listings/${listingId}/process-queue`, {
+      method: "POST",
+    });
+  },
+
+  // Create a new booking
+  createBooking: (bookingData) => {
+    return apiFetch("/rents", {
+      method: "POST",
+      body: JSON.stringify(bookingData),
+    });
+  },
+
+  checkIn: (rentalId) => {
+    return apiFetch(`/rentals/${rentalId}/check-in`, {
+      method: "POST",
+    });
+  },
+
+  checkOut: (rentalId) => {
+    return apiFetch(`/rentals/${rentalId}/check-out`, {
       method: "POST",
     });
   },
@@ -159,40 +180,8 @@ export const bookingAPI = {
   },
 
   // Get all bookings for a company's parking lots
-  getCompanyBookings: () => {
-    return apiFetch("/bookings/company");
-  },
-
-  // Create a new booking
-  createBooking: (bookingData) => {
-    return apiFetch("/bookings", {
-      method: "POST",
-      body: JSON.stringify(bookingData),
-    });
-  },
-
-  // Get details of a specific booking
-  getBookingDetails: (id) => {
-    return apiFetch(`/bookings/${id}`);
-  },
-
-  // Cancel a booking
-  cancelBooking: (id) => {
-    return apiFetch(`/bookings/${id}/cancel`, {
-      method: "PUT",
-    });
-  },
-
-  checkIn: (rentalId) => {
-    return apiFetch(`/rentals/${rentalId}/check-in`, {
-      method: "POST",
-    });
-  },
-
-  checkOut: (rentalId) => {
-    return apiFetch(`/rentals/${rentalId}/check-out`, {
-      method: "POST",
-    });
+  getCompanyBookings: (companyId) => {
+    return apiFetch(`/rents/company/${companyId}`);
   },
 };
 

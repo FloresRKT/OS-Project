@@ -19,6 +19,7 @@ import Dashboard from "../screens/DashBoard";
 import RentalHistory from "../screens/RentalHistoryScreen";
 import YearlyRentalTwoWheeled from "../screens/SPYearly";
 import Profile from "../screens/Profile";
+import CreateListing from "../screens/CreateListing";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -108,6 +109,7 @@ export default function AppNavigation() {
       <Stack.Screen name="Register" component={RegistrationScreen} />
       {/* Added Company Registration Screen */}
       <Stack.Screen name="CompanyRegister" component={CompanyRegistration} />
+      <Stack.Screen name="CreateListing" component={CreateListing} />
     </Stack.Navigator>
   );
 }

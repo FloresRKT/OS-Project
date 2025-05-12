@@ -4,42 +4,23 @@ exports.addUserToQueue = async (req, res) => {
   const {
     listing_id,
     user_id,
-    plate_number,
+    position,
     start_date,
     end_date,
-    total_cost,
   } = req.body;
 
   try {
-    // First, get the current queue position
-    const queue = await new Promise((resolve, reject) => {
-      db.all(
-        'SELECT * FROM reservation_queue WHERE listing_id = ? AND status = "waiting" ORDER BY position ASC',
-        [listing_id],
-        (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        }
-      );
-    });
-
-    // Calculate new position (add to end of queue)
-    const position = queue.length + 1;
-
-    // Add to queue
     const result = await new Promise((resolve, reject) => {
       db.run(
         `INSERT INTO reservation_queue 
-           (listing_id, user_id, position, plate_number, start_date, end_date, total_cost) 
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+           (listing_id, user_id, position, start_date, end_date) 
+           VALUES (?, ?, ?, ?, ?)`,
         [
           listing_id,
           user_id,
           position,
-          plate_number,
           start_date,
           end_date,
-          total_cost,
         ],
         function (err) {
           if (err) reject(err);

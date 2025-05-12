@@ -8,6 +8,7 @@ import {
   Modal,
   Pressable,
   Platform,
+  Alert,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -105,7 +106,7 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
 
             // Calculate dynamic price based on queue length
             // For example: 5% increase for each person in queue
-            const priceIncrease = 1 + (queueData.length+1) * 0.05;
+            const priceIncrease = 1 + (queueData.length + 1) * 0.05;
             const newPrice = Math.round(
               (data.rate_per_day * 30).toFixed(2) * priceIncrease
             );
@@ -128,61 +129,44 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
     fetchListingDetails();
   }, [listingId]);
 
-  const handleDateChange = (event, date) => {
-    setShowDatePicker(false);
-    if (date) setSelectedDate(date.toISOString().split("T")[0]);
-  };
-
   const handleConfirm = async () => {
     setShowConfirmDialog(false);
-    
+
     try {
       let response;
-      
+
+      // Normal booking process
+      const bookingData = {
+        owner_id: listing?.company_id,
+        renter_id: user?.user_id,
+        listing_id: listingId,
+        plate_number: user?.plate_number || "",
+        start_date: getStartDate(),
+        end_date: calculateEndDate(),
+        total_cost: isFullyBooked ? dynamicPrice : listing.rate_per_day * 30,
+        status: isFullyBooked ? "queued" : "pending",
+      };
+
+      response = await parkingAPI.createBooking(bookingData);
+
       if (isFullyBooked) {
         // Add to queue if fully booked
         response = await parkingAPI.addToQueue({
           listing_id: listingId,
           user_id: user.user_id,
-          plate_number: user?.plate_number || "",
+          position: queueLength + 1,
           start_date: getStartDate(),
           end_date: calculateEndDate(),
-          total_cost: dynamicPrice,
-        });
-        
-        navigation.navigate("ConfirmationScreen", {
-          success: true,
-          isQueue: true,
-          position: response.position,
-          listingName: listing.name,
-          startDate: getFormattedMonthYear(),
-        });
-      } else {
-        // Normal booking process
-        const bookingData = {
-          owner_id: listing?.owner_id,
-          renter_id: user?.user_id,
-          listing_id: listingId,
-          plate_number: user?.plate_number || "",
-          start_date: getStartDate(),
-          end_date: calculateEndDate(),
-          total_cost: listing.rate_per_day * 30,
-          status: "pending",
-        };
-        
-        response = await parkingAPI.createBooking(bookingData);
-        
-        navigation.navigate("ConfirmationScreen", {
-          success: true,
-          isQueue: false,
-          bookingId: response.rent_id,
-          listingName: listing.name,
-          startDate: getFormattedMonthYear(),
         });
       }
+
+      navigation.navigate("Rental History");
     } catch (error) {
       console.error("Error during booking process:", error);
-      Alert.alert("Error", "Failed to complete your booking. Please try again.");
+      Alert.alert(
+        "Error",
+        "Failed to complete your booking. Please try again."
+      );
     }
   };
 

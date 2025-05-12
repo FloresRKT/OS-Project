@@ -175,18 +175,16 @@ function createQueueTable() {
     user_id INTEGER NOT NULL,
     position INTEGER NOT NULL,
     request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status TEXT DEFAULT 'pending',
+    status TEXT DEFAULT 'queued',
     plate_number TEXT,
     start_date TEXT NOT NULL,
     end_date TEXT NOT NULL,
-    total_cost REAL NOT NULL,
+    total_cost REAL NOT NULL DEFAULT 0,
     FOREIGN KEY (listing_id) REFERENCES listings (listing_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
   )`, (err) => {
     if (err) {
       console.error("Error creating reservation_queue table:", err.message);
-    } else {
-      console.log("Reservation queue table created successfully");
     }
   });
 }

@@ -5,173 +5,234 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  Image,
-  StatusBar,
+  ScrollView,
+  Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { parkingAPI } from "../services/api";
+import { useUser } from "../context/UserContext";
 
-export default function LoginScreen({ navigation }) {
-  const [role, setRole] = useState("User"); // 'User' or 'Company'
+export default function CreateListing({ navigation }) {
+  const { user } = useUser();
+  const [name, setName] = useState("");
+  const [unitNumber, setUnitNumber] = useState("");
+  const [street, setStreet] = useState("");
+  const [barangay, setBarangay] = useState("");
+  const [municipality, setMunicipality] = useState("");
+  const [region, setRegion] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [totalSpaces, setTotalSpaces] = useState("");
+  const [ratePerDay, setRatePerDay] = useState("");
+  const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    // Form validation
+    if (
+      !name ||
+      !street ||
+      !barangay ||
+      !municipality ||
+      !region ||
+      !zipCode ||
+      !totalSpaces ||
+      !ratePerDay
+    ) {
+      Alert.alert("Error", "Please fill in all required fields");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await parkingAPI.addParkingLot({
+        body: JSON.stringify({
+          company_id: user.company_id,
+          unit_number: unitNumber,
+          street,
+          barangay,
+          municipality,
+          region,
+          zip_code: zipCode,
+          total_spaces: Number(totalSpaces),
+          rate_per_day: Number(ratePerDay),
+          description,
+        }),
+      });
+
+      Alert.alert("Success", "Parking listing created successfully!", [
+        { text: "OK", onPress: () => navigation.navigate("BottomTabs") },
+      ]);
+    } catch (error) {
+      console.error("Create listing error:", error);
+      Alert.alert("Error", error.message || "Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
-      <View style={styles.logoContainer}>
-        <Image
-          source={require("../assets/parkease-logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>List Your Parking Space</Text>
+        </View>
 
-      {/* Conditional Inputs */}
-      {role === "User" ? (
-        <TextInput
-          style={styles.input}
-          placeholder="Plate No."
-          placeholderTextColor="#444"
-        />
-      ) : (
-        <>
+        <View style={styles.formContainer}>
+          <Text style={styles.sectionTitle}>Location</Text>
+          
+          <Text style={styles.label}>Unit/Building Number (Optional)</Text>
           <TextInput
             style={styles.input}
-            placeholder="Username or Email Address"
-            placeholderTextColor="#444"
+            placeholder="Unit or building number"
+            value={unitNumber}
+            onChangeText={setUnitNumber}
           />
+
+          <Text style={styles.label}>Street*</Text>
           <TextInput
             style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#444"
-            secureTextEntry
+            placeholder="Street name"
+            value={street}
+            onChangeText={setStreet}
           />
-        </>
-      )}
 
-      {/* Toggle Role - moved below inputs and resized */}
-      <View style={styles.toggleContainer}>
-        <TouchableOpacity
-          style={[styles.toggleButton, role === "User" && styles.activeToggle]}
-          onPress={() => setRole("User")}
-        >
-          <Text
-            style={[
-              styles.toggleText,
-              role === "User" && styles.activeToggleText,
-            ]}
+          <Text style={styles.label}>Barangay*</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Barangay"
+            value={barangay}
+            onChangeText={setBarangay}
+          />
+
+          <Text style={styles.label}>Municipality/City*</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Municipality or city"
+            value={municipality}
+            onChangeText={setMunicipality}
+          />
+
+          <Text style={styles.label}>Region/Province*</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Region or province"
+            value={region}
+            onChangeText={setRegion}
+          />
+
+          <Text style={styles.label}>ZIP Code*</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="ZIP code"
+            value={zipCode}
+            onChangeText={setZipCode}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.sectionTitle}>Parking Details</Text>
+          
+          <Text style={styles.label}>Total Parking Spaces*</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Number of available spaces"
+            value={totalSpaces}
+            onChangeText={setTotalSpaces}
+            keyboardType="numeric"
+          />
+          
+          <Text style={styles.label}>Rate per Day (₱)*</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Daily rate"
+            value={ratePerDay}
+            onChangeText={setRatePerDay}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.label}>Description (Optional)</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Enter details about your parking space"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={4}
+          />
+
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handleSubmit}
+            disabled={isLoading}
           >
-            User
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.toggleButton,
-            role === "Company" && styles.activeToggle,
-          ]}
-          onPress={() => setRole("Company")}
-        >
-          <Text
-            style={[
-              styles.toggleText,
-              role === "Company" && styles.activeToggleText,
-            ]}
-          >
-            Company
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Buttons */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Dashboard")}
-      >
-        <Text style={styles.buttonText}>Log In</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.outlineButton}
-        onPress={() => navigation.navigate("RegistrationOptions")}
-      >
-        <Text style={styles.outlineButtonText}>Create Account</Text>
-      </TouchableOpacity>
-    </View>
+            <Text style={styles.submitButtonText}>
+              {isLoading ? "Creating..." : "Create Listing"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    padding: 20,
   },
-  logoContainer: { alignItems: "center" },
-  logo: { width: 300, height: 250, borderRadius: 25 },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 25,
+  },
+  backButton: {
+    marginRight: 15,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  formContainer: {
+    flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 15,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingBottom: 5,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    fontWeight: "500",
+  },
   input: {
-    width: "80%",
     height: 50,
-    borderColor: "#000",
+    borderColor: "#ccc",
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    color: "#000",
   },
-  toggleContainer: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginTop: 5,
-    marginBottom: 15,
-    width: "50%",
-    height: 40,
+  textArea: {
+    height: 100,
+    textAlignVertical: "top",
+    paddingTop: 15,
   },
-  toggleButton: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  activeToggle: {
+  submitButton: {
     backgroundColor: "#000",
-  },
-  toggleText: {
-    fontSize: 14,
-    color: "#000",
-  },
-  activeToggleText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  button: {
-    backgroundColor: "#000",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 10,
-    marginTop: 5,
-    width: "60%",
+    paddingVertical: 15,
+    borderRadius: 8,
+    marginTop: 20,
+    marginBottom: 30,
     alignItems: "center",
   },
-  buttonText: {
+  submitButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontFamily: "Inter-ExtraBold",
-  },
-  outlineButton: {
-    borderWidth: 1,
-    borderColor: "#000",
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    marginTop: 10,
-    width: "60%",
-    alignItems: "center",
-  },
-  outlineButtonText: {
-    color: "#000",
-    fontSize: 18,
-    fontFamily: "Inter-ExtraBold",
+    fontWeight: "bold",
   },
 });

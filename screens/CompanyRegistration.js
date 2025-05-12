@@ -1,47 +1,69 @@
 // screens/CompanyRegistration.js
-import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { authAPI } from "../services/api";
 
 export default function CompanyRegistration({ navigation }) {
-  const [companyName, setCompanyName] = useState('');
-  const [companyEmail, setCompanyEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [companyName, setCompanyName] = useState("");
+  const [companyEmail, setCompanyEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = () => {
-    if (!companyName || !companyEmail || !username || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleRegister = async () => {
+    if (!companyName || !companyEmail || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
 
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const response = await authAPI.companyRegister({
+        name: companyName,
+        email: companyEmail,
+        password: password,
+      });
+      
+      Alert.alert("Success", "Company registration successful!");
+      navigation.navigate("CreateListing");
+    } catch (error) {
+      console.error("Registration error:", error);
+      Alert.alert(
+        "Error",
+        error.message || "Something went wrong during registration"
+      );
+    } finally {
       setIsLoading(false);
-      Alert.alert('Success', 'Company registration successful!');
-      navigation.navigate('Login');
-    }, 1500);
+    }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>PARKEASE</Text>
       <Text style={styles.subHeader}>CAR PARKING MANAGEMENT</Text>
-      
+
       <TextInput
         style={styles.input}
         placeholder="Company Name"
         value={companyName}
         onChangeText={setCompanyName}
       />
-      
+
       <TextInput
         style={styles.input}
         placeholder="Company Email Address"
@@ -50,17 +72,17 @@ export default function CompanyRegistration({ navigation }) {
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      
-      {/*
+
+      {/* 
       <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
+      style={styles.input}
+      placeholder="Username"
+      value={username}
+      onChangeText={setUsername}
+      autoCapitalize="none"
       />
       */}
-      
+
       <TextInput
         style={styles.input}
         placeholder="Your Password"
@@ -68,7 +90,7 @@ export default function CompanyRegistration({ navigation }) {
         value={password}
         onChangeText={setPassword}
       />
-      
+
       <TextInput
         style={styles.input}
         placeholder="Confirm your Password"
@@ -77,17 +99,17 @@ export default function CompanyRegistration({ navigation }) {
         onChangeText={setConfirmPassword}
       />
 
-      <TouchableOpacity 
-        style={styles.button} 
+      <TouchableOpacity
+        style={styles.button}
         onPress={handleRegister}
         disabled={isLoading}
       >
         <Text style={styles.buttonText}>
-          {isLoading ? 'Registering...' : 'Register'}
+          {isLoading ? "Registering..." : "Register"}
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
         <Text style={styles.loginText}>
           Already have an account? Login here
         </Text>
@@ -99,25 +121,25 @@ export default function CompanyRegistration({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 10,
   },
   subHeader: {
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 30,
-    color: '#666',
+    color: "#666",
   },
   input: {
     height: 50,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
@@ -125,20 +147,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     padding: 15,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 20,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontFamily: 'Inter-ExtraBold'
+    fontFamily: "Inter-ExtraBold",
   },
   loginText: {
-    color: '#007bff',
-    textAlign: 'center',
+    color: "#007bff",
+    textAlign: "center",
     marginTop: 15,
   },
 });

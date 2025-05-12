@@ -11,9 +11,10 @@ exports.createRental = async (req, res) => {
       start_date,
       end_date,
       total_cost,
+      status,
       remaining_cost,
     } = req.body;
-
+    
     const sql = `INSERT INTO rents (
       owner_id,
       renter_id,
@@ -22,8 +23,9 @@ exports.createRental = async (req, res) => {
       start_date,
       end_date,
       total_cost,
+      status,
       remaining_cost
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     // Prepare parameters with default values if needed
     const params = [
@@ -34,6 +36,7 @@ exports.createRental = async (req, res) => {
       start_date,
       end_date,
       total_cost,
+      status || "pending",
       remaining_cost !== undefined ? remaining_cost : total_cost,
     ];
 

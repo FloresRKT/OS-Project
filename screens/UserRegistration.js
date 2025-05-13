@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   StyleSheet,
-  View,
   ScrollView,
   Text,
   TextInput,
@@ -16,8 +15,6 @@ export default function UserRegistration({ navigation }) {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [plateNumber, setPlateNumber] = useState("");
-  const [licenseSerial, setLicenseSerial] = useState("");
-  const [carType, setCarType] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -101,21 +98,6 @@ export default function UserRegistration({ navigation }) {
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
-
-      {/*
-      <TextInput
-        style={styles.input}
-        placeholder="Driver’s License Serial No."
-        value={licenseSerial}
-        onChangeText={setLicenseSerial}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Car Type"
-        value={carType}
-        onChangeText={setCarType}
-      />
-      */}
 
       <TouchableOpacity
         style={styles.button}

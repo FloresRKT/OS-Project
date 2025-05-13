@@ -1,5 +1,5 @@
 // Base API URL
-const BASE_URL = "http://172.30.18.176:3000/api";
+const BASE_URL = "http://192.168.1.9:3000/api";
 
 // Helper function to handle API responses
 const handleResponse = async (response) => {
@@ -67,7 +67,12 @@ export const authAPI = {
 export const parkingAPI = {
   // Get all listings (for users)
   getAllListings: () => {
-    return apiFetch("/listings");
+    return apiFetch("/listings/users");
+  },
+
+  // Get all listings (for companies)
+  getCompanyListings: (id) => {
+    return apiFetch(`/listings/company/${id}`);
   },
 
   // Get parking lot by ID
@@ -82,7 +87,7 @@ export const parkingAPI = {
 
   // For companies: add a new parking lot
   addParkingLot: (parkingLotData) => {
-    return apiFetch("/listings", {
+    return apiFetch("/listings/company", {
       method: "POST",
       body: JSON.stringify(parkingLotData),
     });

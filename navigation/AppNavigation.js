@@ -14,10 +14,9 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterOptionScreen from "../screens/RegisterOptionScreen";
 import RegistrationScreen from "../screens/UserRegistration";
 import CompanyRegistration from "../screens/CompanyRegistration";
-import UserProfile from "../screens/UserProfile";
 import Dashboard from "../screens/DashBoard";
 import RentalHistory from "../screens/RentalHistoryScreen";
-import YearlyRentalTwoWheeled from "../screens/SPYearly";
+import MonthlyRental from "../screens/MonthlyRental";
 import Profile from "../screens/Profile";
 import CreateListing from "../screens/CreateListing";
 
@@ -101,7 +100,7 @@ export default function AppNavigation() {
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="BottomTabs" component={BottomTabs} />
-      <Stack.Screen name="RentalDetails" component={YearlyRentalTwoWheeled} />
+      <Stack.Screen name="RentalDetails" component={MonthlyRental} />
       <Stack.Screen
         name="RegistrationOptions"
         component={RegisterOptionScreen}

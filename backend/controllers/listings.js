@@ -97,6 +97,27 @@ exports.getAllListings = async (req, res) => {
   }
 };
 
+// Get all listings for a specific company
+exports.getCompanyListings = async (req, res) => {
+  try {
+    const company_id = req.params.id;
+
+    db.all(
+      "SELECT * FROM listings l JOIN companies c ON c.company_id = l.company_id WHERE c.company_id=? ORDER BY l.listing_id DESC",
+      [company_id],
+      (err, rows) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+        } else {
+          res.json(rows || []);
+        }
+      }
+    );
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 // Get listing details by ID
 exports.getListingById = async (req, res) => {
   try {

@@ -3,11 +3,8 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   Modal,
-  Pressable,
-  Platform,
   Alert,
   ActivityIndicator,
 } from "react-native";
@@ -15,16 +12,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../context/UserContext";
 import { parkingAPI } from "../services/api";
 
-export default function YearlyRentalTwoWheeled({ navigation, route }) {
+export default function MonthlyRental({ navigation, route }) {
   const { listingId } = route.params || {};
   const { user } = useUser();
 
   // State variables
-  const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [paymentMethod, setPaymentMethod] = useState("Cash");
-  const [mode, setMode] = useState("reserve");
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,51 +26,50 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
   const [queuePosition, setQueuePosition] = useState(0);
   const [dynamicPrice, setDynamicPrice] = useState(1800);
   const [queueLength, setQueueLength] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(null);
 
-  // Helper function to get the month of the start date
+  const MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  // Helper function to get the next month
   const getStartMonth = () => {
     const nextMonth = new Date().getMonth() + 1;
-
-    const months = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-
-    return `${months[nextMonth]}`;
+    return MONTHS[nextMonth % 12];
   };
 
   // Helper function to format month and year for display
   const getFormattedMonthYear = () => {
-    const month = getStartMonth();
-
-    return `${month} 1, ${selectedYear}`;
+    const year = new Date().getFullYear();
+    return `${getStartMonth()} 1, ${year}`;
   };
 
-  // Helper to calculate end date (1 month after the selected month)
-  const calculateEndDate = () => {
-    if (selectedMonth === null) {
-      const now = new Date();
-      const oneMonthLater = new Date(now);
-      oneMonthLater.setMonth(now.getMonth() + 1);
-      return oneMonthLater.toISOString().split("T")[0];
-    }
+  // Helper to calculate rental period dates
+  const getRentalPeriod = () => {
+    const today = new Date();
+    const currentDay = today.getDate();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
 
-    // Create date from selected month/year
-    const startDate = new Date(selectedYear, selectedMonth, 1);
+    // Always start on the 1st of the next month
+    const startDate = new Date(currentYear, currentMonth + 1, 1);
     const endDate = new Date(startDate);
     endDate.setMonth(startDate.getMonth() + 1);
-    return endDate.toISOString().split("T")[0];
+
+    return {
+      startDate: startDate.toISOString().split("T")[0],
+      endDate: endDate.toISOString().split("T")[0],
+    };
   };
 
   // Fetch listing details when component mounts
@@ -105,11 +97,8 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
             setQueueLength(queueData.length || 0);
 
             // Calculate dynamic price based on queue length
-            // For example: 5% increase for each person in queue
             const priceIncrease = 1 + (queueData.length + 1) * 0.05;
-            const newPrice = Math.round(
-              (data.rate_per_day * 30).toFixed(2) * priceIncrease
-            );
+            const newPrice = Math.round(data.rate_per_day * 30 * priceIncrease);
             setDynamicPrice(newPrice);
 
             // Set user's position in queue if they join
@@ -133,30 +122,29 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
     setShowConfirmDialog(false);
 
     try {
-      let response;
+      const { startDate, endDate } = getRentalPeriod();
 
-      // Normal booking process
       const bookingData = {
         owner_id: listing?.company_id,
         renter_id: user?.user_id,
         listing_id: listingId,
         plate_number: user?.plate_number || "",
-        start_date: getStartDate(),
-        end_date: calculateEndDate(),
+        start_date: startDate,
+        end_date: endDate,
         total_cost: isFullyBooked ? dynamicPrice : listing.rate_per_day * 30,
         status: isFullyBooked ? "queued" : "pending",
       };
 
-      response = await parkingAPI.createBooking(bookingData);
+      await parkingAPI.createBooking(bookingData);
 
       if (isFullyBooked) {
         // Add to queue if fully booked
-        response = await parkingAPI.addToQueue({
+        await parkingAPI.addToQueue({
           listing_id: listingId,
           user_id: user.user_id,
           position: queueLength + 1,
-          start_date: getStartDate(),
-          end_date: calculateEndDate(),
+          start_date: startDate,
+          end_date: endDate,
         });
       }
 
@@ -168,58 +156,6 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
         "Failed to complete your booking. Please try again."
       );
     }
-  };
-
-  // Get start date for API
-  const getStartDate = () => {
-    const today = new Date();
-    const currentDay = today.getDate();
-
-    if (selectedMonth === null) {
-      // If no month selected, use current month if day is 1, otherwise next month
-      if (currentDay === 1) {
-        return today.toISOString().split("T")[0];
-      } else {
-        // Move to first day of next month
-        const nextMonth = new Date(
-          today.getFullYear(),
-          today.getMonth() + 1,
-          1
-        );
-        return nextMonth.toISOString().split("T")[0];
-      }
-    }
-
-    // If user selected this month but it's past the 1st day
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-
-    if (
-      selectedMonth === currentMonth &&
-      selectedYear === currentYear &&
-      currentDay > 1
-    ) {
-      // Move to first day of next month
-      const nextMonth = new Date(currentYear, currentMonth + 1, 1);
-      return nextMonth.toISOString().split("T")[0];
-    }
-
-    // Otherwise use the selected month's first day
-    return new Date(selectedYear, selectedMonth, 1).toISOString().split("T")[0];
-  };
-
-  // Get start date for datepicker
-  const getStartDatePicker = () => {
-    const today = new Date();
-
-    if (today >= 1) {
-      // Move to first day of next month
-      const nextMonth = new Date(currentYear, currentMonth + 1, 1);
-      return nextMonth.toISOString().split("T")[0];
-    }
-
-    // Otherwise use the selected month's first day
-    return new Date(selectedYear, selectedMonth, 1).toISOString().split("T")[0];
   };
 
   // Show loading state
@@ -310,79 +246,13 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
             : `₱${(listing.rate_per_day * 30).toFixed(2)}`}
         </Text>
       </View>
-      {mode === "reserve" && (
-        <>
-          {/*
-          <View style={styles.dateInput}>
-            <Text style={styles.label}>Start Month</Text>
-            <TouchableOpacity
-              onPress={() => setShowMonthPicker(true)}
-              style={styles.dropdownBox}
-            >
-              <Text>{getFormattedMonthYear()}</Text>
-              <Ionicons name="chevron-down" size={20} />
-            </TouchableOpacity>
-          </View>
-          */}
-
-          {/*
-          <Text style={styles.note}>
-            *Note: The company has the right to refuse accepting your
-            reservation once you try to use it a day after the intended date of
-            reservation. The maximum date to reserve is the 7th day from this
-            day.
-          </Text>
-          */}
-        </>
-      )}
-      {mode === "reserve" && (
-        <View>
-          <Text style={styles.label}>Payment Method</Text>
-          <View style={styles.dropdownBox}>
-            <Text>{paymentMethod}</Text>
-            <Ionicons name="chevron-down" size={20} />
-          </View>
+      <View>
+        <Text style={styles.label}>Payment Method</Text>
+        <View style={styles.dropdownBox}>
+          <Text>{paymentMethod}</Text>
+          <Ionicons name="chevron-down" size={20} />
         </View>
-      )}
-      {/*
-      <View style={styles.toggleButtons}>
-        <TouchableOpacity
-          style={[styles.toggleBtn, mode === "reserve" && styles.activeToggle]}
-          onPress={() => setMode("reserve")}
-        >
-          <Text
-            style={
-              mode === "reserve"
-                ? styles.activeToggleText
-                : styles.inactiveToggleText
-            }
-          >
-            Reserve
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleBtn, mode === "park" && styles.activeToggle]}
-          onPress={() => setMode("park")}
-        >
-          <Text
-            style={
-              mode === "park"
-                ? styles.activeToggleText
-                : styles.inactiveToggleText
-            }
-          >
-            Park Now
-          </Text>
-        </TouchableOpacity>
       </View>
-      */}
-      {/*
-      <Text style={styles.penalty}>
-        *An additional of ₱0.20 will be added every minute as a penalty once the
-        vehicle hasn't been recovered after the 30 minutes allowance given once
-        the rent time has lapsed.
-      </Text>
-      */}
       <TouchableOpacity
         style={styles.confirmBtn}
         onPress={() => setShowConfirmDialog(true)}
@@ -391,21 +261,7 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
           {isFullyBooked ? "Join Queue" : "Confirm"}
         </Text>
       </TouchableOpacity>
-      {/*}
-      {showMonthPicker && (
-        <DateTimePicker
-          value={
-            selectedMonth !== null
-              ? new Date(selectedYear, selectedMonth, 1)
-              : new Date()
-          }
-          mode="date"
-          display="spinner"
-          onChange={handleMonthChange}
-          minimumDate={getStartDatePicker()}
-        />
-      )}
-      */}
+
       {/* Confirmation Dialog */}
       <Modal visible={showConfirmDialog} transparent animationType="fade">
         <View style={styles.modalBackground}>
@@ -419,16 +275,11 @@ export default function YearlyRentalTwoWheeled({ navigation, route }) {
             <Text style={styles.dialogTitle}>Are you sure?</Text>
             <Text style={styles.dialogContent}>
               {isFullyBooked
-                ? `You are about to ${
-                    isFullyBooked ? "join the reservation queue" : "reserve"
-                  } a parking space at ${
+                ? `You are about to join the reservation queue for a parking space at ${
                     listing?.name || "this location"
                   } starting on ${getFormattedMonthYear()}.
-                ${
-                  isFullyBooked
-                    ? `\n\nYou will be in queue position #${queuePosition + 1}.`
-                    : ""
-                }`
+                    
+You will be in queue position #${queuePosition + 1}.`
                 : `You are about to park at ${
                     listing?.name || "this location"
                   } for 1 month starting at ${getFormattedMonthYear()}.`}
@@ -457,7 +308,6 @@ const styles = StyleSheet.create({
   priceBanner: {
     backgroundColor: "#FFD700",
     padding: 10,
-
     marginBottom: 16,
     borderRadius: 6,
     alignItems: "center",
@@ -479,7 +329,6 @@ const styles = StyleSheet.create({
   },
   spaceText: { color: "#fff", fontWeight: "bold" },
   availableText: { color: "#fff", fontSize: 10 },
-  dateInput: { marginTop: 10 },
   label: { fontWeight: "bold", marginBottom: 4 },
   dropdownBox: {
     borderWidth: 1,
@@ -489,34 +338,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  note: { fontSize: 10, marginVertical: 6 },
-  toggleButtons: {
-    flexDirection: "row",
-    marginVertical: 10,
-    justifyContent: "center",
-  },
-  toggleBtn: {
-    flex: 1,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#000",
-    marginHorizontal: 5,
-  },
-  activeToggle: { backgroundColor: "#000" },
-  activeToggleText: { color: "#fff", textAlign: "center" },
-  inactiveToggleText: { color: "#000", textAlign: "center" },
-  penalty: { fontSize: 10, marginVertical: 10 },
   confirmBtn: {
     backgroundColor: "#000",
     padding: 12,
     borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
-  },
-  disabledButton: {
-    backgroundColor: "#888",
   },
   confirmText: { color: "#fff", fontWeight: "bold" },
   modalBackground: {
@@ -545,7 +372,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginTop: 10,
   },
-  // Add these styles
   queueBanner: {
     backgroundColor: "#f44336", // Red
     padding: 10,
@@ -588,10 +414,5 @@ const styles = StyleSheet.create({
   },
   bookingStatusContainer: {
     marginVertical: 0,
-  },
-  dialogPriceText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 10,
   },
 });

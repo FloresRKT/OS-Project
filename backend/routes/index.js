@@ -18,7 +18,8 @@ const {
 
 const {
   createListing, // POST a new listing
-  getAllListings, // GET listing/
+  getAllListings, // GET listing/users
+  getCompanyListings, // GET listing/company/:id
   getListingById, // GET listing/:id
   updateListing, // PUT listing/:id
   deleteListing, // DELETE listing/:id
@@ -52,10 +53,9 @@ router.post("/company/login", loginCompany); // POST /company/login
 router.get("/company/:id", getCompanyById); // GET /company/123
   
 // Listing management routes
-router
-  .route("/listings")
-  .post(createListing) // POST /listings
-  .get(getAllListings); // GET /listings
+router.get("/listings/users", getAllListings);  // GET /listings/users
+router.post("/listings/company", createListing);  // POST /listings/company
+router.get("/listings/company/:id", getCompanyListings); // GET /listings/company/123
 router
   .route("/listings/:id")
   .get(getListingById) // GET /listings/123

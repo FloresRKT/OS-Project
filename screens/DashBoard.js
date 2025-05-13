@@ -24,8 +24,14 @@ export default function Dashboard({ navigation }) {
 
   const fetchLatestListings = async () => {
     try {
-      const data = await parkingAPI.getAllListings();
-      setParkingData(data);
+      if (user.user_type === "USER") {
+        const data = await parkingAPI.getAllListings();
+        setParkingData(data);
+      } else {
+        const data = await parkingAPI.getCompanyListings(user.company_id);
+        console.log("Company Listings:", data);
+        setParkingData(data);
+      }
     } catch (error) {
       console.error("Error fetching parking lots:", error);
     }
@@ -50,18 +56,6 @@ export default function Dashboard({ navigation }) {
     if (percentage >= 90) return "#ff4d4d"; // Red for high occupancy
     if (percentage >= 70) return "#ffaa00"; // Orange for medium occupancy
     return "#4CAF50"; // Green for low occupancy
-  };
-
-  // Helper function for text color
-  const getOccupancyTextStyle = (occupancy = 0, total = 1) => {
-    const percentage = (occupancy / total) * 100;
-
-    if (percentage >= 90) {
-      return styles.highOccupancyText;
-    } else if (percentage >= 70) {
-      return styles.mediumOccupancyText;
-    }
-    return styles.lowOccupancyText;
   };
 
   return (
@@ -166,6 +160,88 @@ export default function Dashboard({ navigation }) {
           <View style={styles.searchContainer}>
             <Text style={styles.header}>Company Dashboard</Text>
           </View>
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={["#000"]}
+                tintColor="#000"
+              />
+            }
+          >
+            {/* Company Listings */}
+            {parkingData.map((lot) => (
+              <View key={lot.listing_id} style={styles.card}>
+                <View style={styles.logoAndDetails}>
+                  <Image
+                    source={{
+                      uri: lot.logo || "https://via.placeholder.com/50",
+                    }}
+                    style={styles.logo}
+                  />
+                  <View style={styles.details}>
+                    <Text style={styles.companyName}>{lot.name}</Text>
+                    <Text style={styles.address}>
+                      {lot.unit_number} {lot.street}, {lot.barangay},{" "}
+                      {lot.municipality}, {lot.region}, {lot.zip_code}
+                    </Text>
+                    <Text style={styles.description}>
+                      <Text style={styles.label}>Description:</Text>{" "}
+                      {lot.description}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Capacity and Occupancy Information */}
+                <View style={styles.capacityContainer}>
+                  <Text style={styles.slots}>
+                    <Text style={styles.greenText}>
+                      {Math.max(0, lot.total_spaces - (lot.occupancy || 0))}
+                    </Text>{" "}
+                    Available of {lot.total_spaces} spaces
+                  </Text>
+
+                  {/* Occupancy Indicator Bar */}
+                  <View style={styles.occupancyBarContainer}>
+                    <View
+                      style={[
+                        styles.occupancyBar,
+                        {
+                          width: `${Math.min(
+                            100,
+                            ((lot.occupancy || 0) / lot.total_spaces) * 100
+                          )}%`,
+                          backgroundColor: getOccupancyColor(
+                            lot.occupancy,
+                            lot.total_spaces
+                          ),
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+                <View style={styles.separator} />
+                <TouchableOpacity
+                  style={styles.parkButton}
+                  onPress={() =>
+                    navigation.navigate("RentalDetails", {
+                      listingId: lot.listing_id,
+                    })
+                  }
+                >
+                  <Text style={styles.parkButtonText}>Park Here</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+          <TouchableOpacity
+            style={styles.createButton}
+            onPress={() => navigation.navigate("CreateListing")}
+          >
+            <Text style={styles.createButtonText}>Create New Listing</Text>
+          </TouchableOpacity>
         </>
       )}
     </View>
@@ -265,18 +341,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-  highOccupancyText: {
-    color: "#ff4d4d",
-    fontWeight: "bold",
-  },
-  mediumOccupancyText: {
-    color: "#ffaa00",
-    fontWeight: "bold",
-  },
-  lowOccupancyText: {
-    color: "#4CAF50",
-    fontWeight: "bold",
-  },
   capacityContainer: {
     marginTop: 5,
   },
@@ -290,5 +354,25 @@ const styles = StyleSheet.create({
   occupancyBar: {
     height: "100%",
     borderRadius: 3,
+  },
+  createButton: {
+    backgroundColor: "#000",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    alignSelf: "center",
+    marginTop: 20,
+    width: "80%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  createButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
